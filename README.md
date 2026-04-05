@@ -7,118 +7,245 @@
 [![MIT License][license-shield]][license-url]
 [![LinkedIn][linkedin-shield]][linkedin-url]
 
+<p align="center">
+  <img src="images/logo-codereview-metal-transparente.png" width="45%" />
+</p>
 
-  <p align="center">
-  <img src="images/logoCygnusTech.png" width="50%" \>
-  </p>
+<h1 align="center">Code Guardian</h1>
 
-<h1 align="center">Projeto XXX</h3>
+<p align="center">
+  Análise de código C# automatizada — engine Python + extensão Visual Studio.<br/>
+  Detecta vulnerabilidades, code smells e métricas de qualidade diretamente no seu repositório.
+</p>
 
-<!-- ABOUT THE PROJECT -->
+<p align="center">
+  <a href="https://github.com/marcosaraujo-dev/code-guardian/issues">Reportar Bug</a>
+  ·
+  <a href="https://github.com/marcosaraujo-dev/code-guardian/issues">Solicitar Feature</a>
+  ·
+  <a href="https://cygnusforge.com.br">CygnusForge</a>
+</p>
+
+---
 
 ## Sobre o Projeto
 
-Projeto criado para aprendizagem da linguagem Typescript, seguindo aulas da plataforma DevSamurai.
-Com o intuito de aprendizado não foram feitas modificações nas funcionalidades além do que foi apresentado no treinamento.
-O intuito do projeto é criar uma lista de tarefas onde o usuário pode adicionar, excluir ou marcar a tarefa como finalizada.
+**Code Guardian** é uma ferramenta de code review automatizado para projetos C#. Combina uma engine de análise estática em Python com integração nativa ao Visual Studio via extensão VSIX.
 
-<h4>Title</h4>
-Description
-<p align="center>
-<img src="src/images/xxx.jpg" \>
-  </p>
-<br/>
-
+- **Sem dependência de serviços externos** — roda localmente, sem envio de código para nuvem
+- **Integração com git hooks** — bloqueia commits com issues críticos
+- **Risk Score** — pontuação de 0 a 100 por arquivo ou solução inteira
+- **Extensão Visual Studio** — resultados direto na Error List e no Tool Window
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
-# Tecnologias
+---
 
+## O que detecta
 
-### Languages
-![C#](https://img.shields.io/badge/c%23-%23239120.svg?style=for-the-badge&logo=c-sharp&logoColor=white)
-![image](https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white)
-![image](https://img.shields.io/badge/JavaScript-323330?style=for-the-badge&logo=javascript&logoColor=white)
-![image](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)
-
-### Frameworks, Platforms and Libraries
-![.Net](https://img.shields.io/badge/.NET-5C2D91?style=for-the-badge&logo=.net&logoColor=white)
-![Blazor](https://img.shields.io/badge/blazor-%235C2D91.svg?style=for-the-badge&logo=blazor&logoColor=white)
-![image](https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3&logoColor=white)
-![image](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
-![image](https://img.shields.io/badge/Node.js-43853D?style=for-the-badge&logo=node.js&logoColor=white)
-![Next JS](https://img.shields.io/badge/Next-black?style=for-the-badge&logo=next.js&logoColor=white)
-![Vue.js](https://img.shields.io/badge/vuejs-%2335495e.svg?style=for-the-badge&logo=vuedotjs&logoColor=%234FC08D)
-![Express.js](https://img.shields.io/badge/express.js-%23404d59.svg?style=for-the-badge&logo=express&logoColor=%2361DAFB)
-![image](https://img.shields.io/badge/Angular-DD0031?style=for-the-badge&logo=angular&logoColor=white)
-![image](https://img.shields.io/badge/Bootstrap-563D7C?style=for-the-badge&logo=bootstrap&logoColor=white)
-![image](https://img.shields.io/badge/styled--components-DB7093?style=for-the-badge&logo=styled-components&logoColor=white)
-![image](https://img.shields.io/badge/Material--UI-0081CB?style=for-the-badge&logo=material-ui&logoColor=white)
-![RabbitMQ](https://img.shields.io/badge/Rabbitmq-FF6600?style=for-the-badge&logo=rabbitmq&logoColor=white)
-![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi)
-![Insomnia](https://img.shields.io/badge/Insomnia-black?style=for-the-badge&logo=insomnia&logoColor=5849BE)
-![Vite](https://img.shields.io/badge/vite-%23646CFF.svg?style=for-the-badge&logo=vite&logoColor=white)
-
-
-### Databases
-![image](https://img.shields.io/badge/Redis-D9281A?style=for-the-badge&logo=redis&logoColor=white)
-![image](https://img.shields.io/badge/Microsoft%20SQL%20Server-CC2927?style=for-the-badge&logo=microsoft%20sql%20server&logoColor=white)
-![image](https://img.shields.io/badge/MySQL-00000F?style=for-the-badge&logo=mysql&logoColor=white)
-![image](https://img.shields.io/badge/SQLite-07405E?style=for-the-badge&logo=sqlite&logoColor=white)
-![image](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)
-
-![image](https://img.shields.io/badge/Microsoft_Azure-0089D6?style=for-the-badge&logo=microsoft-azure&logoColor=white)
-
-![image](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)
-![image](https://img.shields.io/badge/Git-E34F26?style=for-the-badge&logo=git&logoColor=white)
-
-### Designer
-![Figma](https://img.shields.io/badge/figma-%23F24E1E.svg?style=for-the-badge&logo=figma&logoColor=white)
-![Figma](https://img.shields.io/badge/draw.io-%002E3B.svg?style=for-the-badge&logo=draw.io&logoColor=white)
-
-### Testing
-![cypress](https://img.shields.io/badge/-cypress-%23E5E5E5?style=for-the-badge&logo=cypress&logoColor=058a5e)
-![Jest](https://img.shields.io/badge/-jest-%23C21325?style=for-the-badge&logo=jest&logoColor=white)
-![NestJS](https://img.shields.io/badge/nestjs-%23E0234E.svg?style=for-the-badge&logo=nestjs&logoColor=white)
-![JUnit](https://img.shields.io/badge/Junit-25A162?style=for-the-badge&logo=junit5&logoColor=white)
-![MSTest](https://img.shields.io/badge/MSTest-234a4a4a?style=for-the-badge&logo=MSTest&logoColor=white)
-![NUnit](https://img.shields.io/badge/NUnit-16B7FB?style=for-the-badge&logo=NUnit&logoColor=white)
-
-<!-- CONTACT -->
-
-## Contatos
-
-Marcos Araujo - [@linkedIn](https://www.linkedin.com/in/marcosaraujosouza/) - marcos.araso@hotmail.com
-
-Project Link: [Projeto_Base_Typescript](https://github.com/marcosaraujo-dev/Projeto_Base_Typescript)
+| Categoria | Exemplos |
+|-----------|----------|
+| **Segurança** | SQL Injection, secrets hardcoded, path traversal, deserialização insegura |
+| **Confiabilidade** | Exception swallowing, catch vazio, loops sem condição de saída |
+| **Performance** | Padrão N+1, concatenação de string em loop, ausência de CancellationToken |
+| **Clean Code** | God Class, métodos > 30 linhas, nesting > 5 níveis, magic numbers |
+| **Async/Await** | `.Result` / `.Wait()` gerando deadlock, fire-and-forget sem tratamento |
+| **VB6** | SQL Injection, error handling incorreto, violações de arquitetura clsN/clsD |
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
-<!-- ACKNOWLEDGMENTS -->
+---
 
-## Agradecimentos
-![image](https://img.shields.io/badge/YouTube-FF0000?style=for-the-badge&logo=youtube&logoColor=white)
-![image](https://img.shields.io/badge/Medium-12100E?style=for-the-badge&logo=medium&logoColor=white)
-![image](https://img.shields.io/badge/dev.to-0A0A0A?style=for-the-badge&logo=dev.to&logoColor=white)
+## Estrutura do Repositório
 
-
-
--   [XXXXXXX](https://XXXXXX/)
+```
+code-guardian/
+├── code_guardian/          # Engine de análise (Python)
+│   ├── runner.py           # Orquestrador principal
+│   ├── rule_engine.py      # 20+ regras C# (regex)
+│   ├── vb6_rule_engine.py  # 20+ regras VB6
+│   ├── metrics.py          # Métricas de qualidade
+│   ├── diff_parser.py      # Parser de git diff
+│   ├── ai_client.py        # Análise via IA (Gemini/Claude/OpenAI/Ollama)
+│   ├── spelling_checker.py # Verificação ortográfica em strings
+│   ├── install_hooks.py    # Instalador de git hooks
+│   └── config.json         # Configuração dos providers de IA
+│
+├── CodeGuardian.VS/        # Extensão Visual Studio (C# / VSIX)
+│   ├── CodeGuardian.VS.sln
+│   ├── LICENSE
+│   └── src/CodeGuardian.VS/
+│
+├── review.bat              # Atalho CLI para análise rápida (Windows)
+├── test-guardian.bat       # Testes dos scripts Python
+└── images/                 # Logos e assets
+```
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
-<!-- MARKDOWN LINKS & IMAGES -->
-<!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
+---
 
-[contributors-shield]: https://img.shields.io/github/contributors/marcosaraujo-dev/Projeto_Base_Typescript.svg?style=for-the-badge
-[contributors-url]: https://github.com/marcosaraujo-dev/Projeto_Base_Typescript/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/marcosaraujo-dev/Projeto_Base_Typescript.svg?style=for-the-badge
-[forks-url]: https://github.com/marcosaraujo-dev/Projeto_Base_Typescript/network/members
-[stars-shield]: https://img.shields.io/github/stars/marcosaraujo-dev/Projeto_Base_Typescript.svg?style=for-the-badge
-[stars-url]: https://github.com/marcosaraujo-dev/Projeto_Base_Typescript/stargazers
-[issues-shield]: https://img.shields.io/github/issues/marcosaraujo-dev/Projeto_Base_Typescript.svg?style=for-the-badge
-[issues-url]: https://github.com/marcosaraujo-dev/Projeto_Base_Typescript/issues
-[license-shield]: https://img.shields.io/github/license/marcosaraujo-dev/Projeto_Base_Typescript.svg?style=for-the-badge
-[license-url]: https://github.com/marcosaraujo-dev/Projeto_Base_Typescript/blob/master/LICENSE.txt
+## Pré-requisitos
+
+| Requisito | Versão mínima |
+|-----------|--------------|
+| Python | 3.8+ |
+| Git | qualquer versão recente |
+| Visual Studio *(extensão)* | 2019 (16.x) ou 2022 (17.x) |
+
+<p align="right">(<a href="#top">back to top</a>)</p>
+
+---
+
+## Instalação e Uso
+
+### 1. Clonar e configurar
+
+```bash
+git clone https://github.com/marcosaraujo-dev/code-guardian.git
+```
+
+Copie a pasta `code_guardian/` para a raiz do seu repositório:
+
+```
+seu-projeto/
+├── code_guardian/      ← copiar aqui
+├── src/
+└── ...
+```
+
+### 2. Uso pela linha de comando
+
+```bash
+# Analisar arquivo único
+python code_guardian/runner.py --file src/MinhaClasse.cs
+
+# Varrer diretório inteiro
+python code_guardian/runner.py --scan --dir ./src
+
+# Analisar apenas o diff staged (pre-commit)
+python code_guardian/runner.py --staged
+
+# Apenas regras, sem IA (mais rápido)
+python code_guardian/runner.py --scan --rules-only --format json
+```
+
+```bash
+# Atalho Windows
+review.bat
+```
+
+### 3. Git Hooks
+
+```bash
+python code_guardian/install_hooks.py install
+```
+
+Bloqueia o commit automaticamente se houver issues com severidade `critical` ou `error`.
+
+### 4. Extensão Visual Studio
+
+Instale o `.vsix` disponível em [Releases](https://github.com/marcosaraujo-dev/code-guardian/releases) ou pelo [Visual Studio Marketplace](https://marketplace.visualstudio.com/publishers/cygnusforge).
+
+Após instalar:
+- **Tools → Code Guardian** — abre o painel com Risk Score e lista de issues
+- **Tools → Analyze Current File** — analisa o arquivo `.cs` aberto
+- Clique direito na solution → **Analyze with Code Guardian** — scan completo
+- **Tools → Code Guardian: Install Git Hooks** — instala o hook no repositório atual
+
+<p align="right">(<a href="#top">back to top</a>)</p>
+
+---
+
+## Configuração da IA
+
+Edite `code_guardian/config.json`:
+
+```json
+{
+  "ai": {
+    "primary": "gemini",
+    "fallback": "ollama",
+    "gemini": { "model": "gemini-1.5-pro", "api_key_env": "GEMINI_API_KEY" },
+    "claude": { "model": "claude-sonnet-4-6", "api_key_env": "ANTHROPIC_API_KEY" },
+    "openai": { "model": "gpt-4o", "api_key_env": "OPENAI_API_KEY" },
+    "ollama": { "base_url": "http://localhost:11434", "model": "qwen2.5-coder:32b" }
+  }
+}
+```
+
+Sem IA configurada, a engine de regras estáticas continua funcionando normalmente.
+
+<p align="right">(<a href="#top">back to top</a>)</p>
+
+---
+
+## Risk Score
+
+| Score | Classificação | Ação recomendada |
+|-------|--------------|-----------------|
+| 0–10 | 🟢 Baixo risco | Código em boa forma |
+| 11–30 | 🟡 Moderado | Revisar warnings |
+| 31–60 | 🟠 Alto risco | Corrigir antes de merge |
+| 61–100 | 🔴 Crítico | Bloqueado pelo pre-commit hook |
+
+<p align="right">(<a href="#top">back to top</a>)</p>
+
+---
+
+## Tecnologias
+
+![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
+![C#](https://img.shields.io/badge/C%23-239120?style=for-the-badge&logo=c-sharp&logoColor=white)
+![.NET](https://img.shields.io/badge/.NET_4.7.2-5C2D91?style=for-the-badge&logo=.net&logoColor=white)
+![Visual Studio](https://img.shields.io/badge/Visual_Studio-5C2D91?style=for-the-badge&logo=visual-studio&logoColor=white)
+![WPF](https://img.shields.io/badge/WPF-0078D6?style=for-the-badge&logo=windows&logoColor=white)
+![Git](https://img.shields.io/badge/Git-E34F26?style=for-the-badge&logo=git&logoColor=white)
+
+<p align="right">(<a href="#top">back to top</a>)</p>
+
+---
+
+## Contribuindo
+
+1. Fork o repositório
+2. Crie sua branch: `git checkout -b feat/minha-feature`
+3. Commit: `git commit -m "feat: descrição da feature"`
+4. Push: `git push origin feat/minha-feature`
+5. Abra um Pull Request
+
+<p align="right">(<a href="#top">back to top</a>)</p>
+
+---
+
+## Contato
+
+Marcos Araujo — [@LinkedIn](https://www.linkedin.com/in/marcosaraujosouza/) — marcos.araso@hotmail.com
+
+Projeto: [github.com/marcosaraujo-dev/code-guardian](https://github.com/marcosaraujo-dev/code-guardian)
+
+Site: [cygnusforge.com.br](https://cygnusforge.com.br)
+
+<p align="right">(<a href="#top">back to top</a>)</p>
+
+---
+
+## Licença
+
+Distribuído sob a licença MIT. Veja [`LICENSE`](LICENSE) para mais informações.
+
+<p align="right">(<a href="#top">back to top</a>)</p>
+
+<!-- MARKDOWN LINKS -->
+[contributors-shield]: https://img.shields.io/github/contributors/marcosaraujo-dev/code-guardian.svg?style=for-the-badge
+[contributors-url]: https://github.com/marcosaraujo-dev/code-guardian/graphs/contributors
+[forks-shield]: https://img.shields.io/github/forks/marcosaraujo-dev/code-guardian.svg?style=for-the-badge
+[forks-url]: https://github.com/marcosaraujo-dev/code-guardian/network/members
+[stars-shield]: https://img.shields.io/github/stars/marcosaraujo-dev/code-guardian.svg?style=for-the-badge
+[stars-url]: https://github.com/marcosaraujo-dev/code-guardian/stargazers
+[issues-shield]: https://img.shields.io/github/issues/marcosaraujo-dev/code-guardian.svg?style=for-the-badge
+[issues-url]: https://github.com/marcosaraujo-dev/code-guardian/issues
+[license-shield]: https://img.shields.io/github/license/marcosaraujo-dev/code-guardian.svg?style=for-the-badge
+[license-url]: https://github.com/marcosaraujo-dev/code-guardian/blob/main/LICENSE
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
 [linkedin-url]: https://www.linkedin.com/in/marcosaraujosouza/

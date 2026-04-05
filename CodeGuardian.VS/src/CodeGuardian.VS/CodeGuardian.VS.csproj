@@ -1,0 +1,67 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+    <OutputType>Library</OutputType>
+    <RootNamespace>CodeGuardian.VS</RootNamespace>
+    <AssemblyName>CodeGuardian.VS</AssemblyName>
+    <UseCodebase>true</UseCodebase>
+    <GeneratePkgDefFile>true</GeneratePkgDefFile>
+    <IncludeAssemblyInVSIXContainer>true</IncludeAssemblyInVSIXContainer>
+    <IncludeDebugSymbolsInVSIXContainer>false</IncludeDebugSymbolsInVSIXContainer>
+    <IncludeDebugSymbolsInLocalVSIXDeployment>true</IncludeDebugSymbolsInLocalVSIXDeployment>
+    <CopyBuildOutputToOutputDirectory>true</CopyBuildOutputToOutputDirectory>
+    <CreateVsixContainer>true</CreateVsixContainer>
+    <DeployExtension>true</DeployExtension>
+    <DeployVSTemplates>false</DeployVSTemplates>
+    <UseWPF>true</UseWPF>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <!-- Necessário para o VSSDK localizar o devenv e fazer deploy experimental -->
+    <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
+    <!-- Garante que IntermediateOutputPath está disponível quando os targets VSSDK rodam -->
+    <IntermediateOutputPath Condition="'$(IntermediateOutputPath)' == ''">obj\$(Configuration)\$(TargetFramework)\</IntermediateOutputPath>
+    <!-- Define ResourceManifest com caminho absoluto para evitar VSSDK1207 -->
+    <ResourceManifest>$(MSBuildProjectDirectory)\obj\$(Configuration)\$(TargetFramework)\resources.json</ResourceManifest>
+    <!-- Define o assembly que o CreatePkgDef vai processar para gerar o .pkgdef -->
+    <CreatePkgDefAssemblyToProcess>$(MSBuildProjectDirectory)\bin\$(Configuration)\$(TargetFramework)\$(AssemblyName).dll</CreatePkgDefAssemblyToProcess>
+    <!-- Nome e destino do arquivo .vsix gerado -->
+    <TargetVsixContainerName>CodeGuardian.VS</TargetVsixContainerName>
+    <VsixOutputPath>$(MSBuildProjectDirectory)\..\..\release\</VsixOutputPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.VisualStudio.SDK" Version="17.0.31902.203" />
+    <PackageReference Include="Microsoft.VSSDK.BuildTools" Version="17.0.5232" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <VSCTCompile Include="Package\CodeGuardianPackage.vsct">
+      <ResourceName>Menus.ctmenu</ResourceName>
+    </VSCTCompile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="source.extension.vsixmanifest">
+      <SubType>Designer</SubType>
+    </None>
+    <Content Include="LICENSE">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <IncludeInVSIX>true</IncludeInVSIX>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Logo embutida na DLL — acessível via pack URI no WPF -->
+    <Resource Include="Resources\logo-codeguardian.png" />
+    <!-- Cópia loose para o pacote VSIX — referenciada pelo manifesto como ícone -->
+    <Content Include="Resources\logo-codeguardian.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <IncludeInVSIX>true</IncludeInVSIX>
+      <VSIXSubPath>Resources</VSIXSubPath>
+    </Content>
+  </ItemGroup>
+
+  <!-- Import explícito dos targets VSSDK (CreateVsixContainer, GeneratePkgDef, DeployVsixExtension) -->
+  <Import Project="$(VsSDKInstall)\Microsoft.VsSDK.targets" Condition="'$(VsSDKInstall)' != '' and Exists('$(VsSDKInstall)\Microsoft.VsSDK.targets')" />
+</Project>

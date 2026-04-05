@@ -1,0 +1,25 @@
+{
+  "ai": {
+    "primary": "gemini",
+    "fallback": "ollama",
+    "gemini": {
+      "model": "gemini-1.5-pro",
+      "api_key_env": "GEMINI_API_KEY"
+    },
+    "claude": {
+      "model": "claude-sonnet-4-6",
+      "api_key_env": "ANTHROPIC_API_KEY",
+      "max_tokens": 4096
+    },
+    "openai": {
+      "model": "gpt-4o",
+      "api_key_env": "OPENAI_API_KEY",
+      "max_tokens": 4096
+    },
+    "ollama": {
+      "base_url": "http://localhost:11434",
+      "model": "qwen2.5-coder:32b",
+      "timeout_seconds": 120
+    }
+  }
+}

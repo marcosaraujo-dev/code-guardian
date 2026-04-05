@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PackageManifest Version="2.0.0"
+                 xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011"
+                 xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
+  <Metadata>
+    <Identity Id="CodeGuardian.VS.bb4a2eab-5a25-4ab4-aca9-a55dee5fbf9c"
+              Version="1.0.0"
+              Language="pt-BR"
+              Publisher="Marcos Araujo" />
+    <DisplayName>Code Guardian</DisplayName>
+    <Description xml:space="preserve">Code review automatizado de C# integrado ao Visual Studio.</Description>
+    <MoreInfo>https://github.com/marcosaraujo-dev/code-guardian</MoreInfo>
+    <License>LICENSE</License>
+    <Icon>Resources\logo-codeguardian.png</Icon>
+    <PreviewImage>Resources\logo-codeguardian.png</PreviewImage>
+  </Metadata>
+  <Installation>
+    <InstallationTarget Id="Microsoft.VisualStudio.Community"    Version="[16.0,17.0)" />
+    <InstallationTarget Id="Microsoft.VisualStudio.Professional" Version="[16.0,17.0)" />
+    <InstallationTarget Id="Microsoft.VisualStudio.Enterprise"   Version="[16.0,17.0)" />
+    <InstallationTarget Id="Microsoft.VisualStudio.Community"    Version="[17.0,18.0)">
+      <ProductArchitecture>amd64</ProductArchitecture>
+    </InstallationTarget>
+    <InstallationTarget Id="Microsoft.VisualStudio.Professional" Version="[17.0,18.0)">
+      <ProductArchitecture>amd64</ProductArchitecture>
+    </InstallationTarget>
+    <InstallationTarget Id="Microsoft.VisualStudio.Enterprise"   Version="[17.0,18.0)">
+      <ProductArchitecture>amd64</ProductArchitecture>
+    </InstallationTarget>
+  </Installation>
+  <Prerequisites>
+    <Prerequisite Id="Microsoft.VisualStudio.Component.CoreEditor"
+                  Version="[16.0,18.0)"
+                  DisplayName="Visual Studio core editor" />
+  </Prerequisites>
+  <Dependencies>
+    <Dependency Id="Microsoft.Framework.NDP"
+                DisplayName="Microsoft .NET Framework"
+                d:Source="Auto"
+                Version="[4.7.2,)" />
+  </Dependencies>
+  <Assets>
+    <Asset Type="Microsoft.VisualStudio.VsPackage"
+           d:Source="Project"
+           d:ProjectName="%CurrentProject%"
+           Path="|%CurrentProject%;PkgdefProjectOutputGroup|" />
+    <Asset Type="Microsoft.VisualStudio.MefComponent"
+           d:Source="Project"
+           d:ProjectName="%CurrentProject%"
+           Path="|%CurrentProject%|" />
+  </Assets>
+</PackageManifest>

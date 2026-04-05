@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CommandTable xmlns="http://schemas.microsoft.com/VisualStudio/2005-10-18/CommandTable"
+              xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+  <!-- Definicao do arquivo de comandos para o Code Guardian -->
+  <!-- GUIDs: Package = a1b2c3d4-..., CommandSet = b2c3d4e5-... -->
+
+  <Extern href="stdidcmd.h" />
+  <Extern href="vsshlids.h" />
+
+  <Commands package="guidCodeGuardianPackage">
+
+    <Groups>
+      <!-- Grupo no menu Tools (apos "External Tools") -->
+      <Group guid="guidCodeGuardianCommandSet" id="grpCodeGuardianTools" priority="0x0600">
+        <Parent guid="guidSHLMainMenu" id="IDM_VS_MENU_TOOLS" />
+      </Group>
+
+      <!-- Grupo no context menu do Solution Explorer -->
+      <Group guid="guidCodeGuardianCommandSet" id="grpCodeGuardianContext" priority="0x0600">
+        <Parent guid="guidSHLMainMenu" id="IDM_VS_CTXT_PROJNODE" />
+      </Group>
+    </Groups>
+
+    <Buttons>
+
+      <!-- Abrir Tool Window (Tools > Code Guardian) -->
+      <Button guid="guidCodeGuardianCommandSet" id="cmdOpenToolWindow" priority="0x0100" type="Button">
+        <Parent guid="guidCodeGuardianCommandSet" id="grpCodeGuardianTools" />
+        <CommandFlag>DynamicVisibility</CommandFlag>
+        <Strings>
+          <ButtonText>Code Guardian</ButtonText>
+          <MenuText>Code &amp;Guardian</MenuText>
+          <ToolTipText>Abrir painel do Code Guardian com Risk Score e metricas</ToolTipText>
+        </Strings>
+      </Button>
+
+      <!-- Analisar arquivo atual (Tools > Analyze Current File) -->
+      <Button guid="guidCodeGuardianCommandSet" id="cmdAnalyzeFile" priority="0x0101" type="Button">
+        <Parent guid="guidCodeGuardianCommandSet" id="grpCodeGuardianTools" />
+        <CommandFlag>DynamicVisibility</CommandFlag>
+        <Strings>
+          <ButtonText>Analyze Current File (Code Guardian)</ButtonText>
+          <MenuText>Analyze Current &amp;File (Code Guardian)</MenuText>
+          <ToolTipText>Analisar o arquivo .cs atualmente aberto com o Code Guardian</ToolTipText>
+        </Strings>
+      </Button>
+
+      <!-- Instalar Git Hooks (Tools > Code Guardian: Install Git Hooks) -->
+      <Button guid="guidCodeGuardianCommandSet" id="cmdInstallHooks" priority="0x0102" type="Button">
+        <Parent guid="guidCodeGuardianCommandSet" id="grpCodeGuardianTools" />
+        <CommandFlag>DynamicVisibility</CommandFlag>
+        <Strings>
+          <ButtonText>Code Guardian: Install Git Hooks</ButtonText>
+          <MenuText>Code Guardian: Install &amp;Git Hooks</MenuText>
+          <ToolTipText>Instalar os git hooks do Code Guardian no repositorio atual</ToolTipText>
+        </Strings>
+      </Button>
+
+      <!-- Context menu Solution Explorer: Analyze with Code Guardian -->
+      <Button guid="guidCodeGuardianCommandSet" id="cmdAnalyzeSolution" priority="0x0600" type="Button">
+        <Parent guid="guidCodeGuardianCommandSet" id="grpCodeGuardianContext" />
+        <CommandFlag>DynamicVisibility</CommandFlag>
+        <Strings>
+          <ButtonText>Analyze with Code Guardian</ButtonText>
+          <MenuText>Analyze with Code &amp;Guardian</MenuText>
+          <ToolTipText>Executar scan completo da solucao com o Code Guardian</ToolTipText>
+        </Strings>
+      </Button>
+
+    </Buttons>
+
+  </Commands>
+
+  <Symbols>
+    <!-- GUID do package -->
+    <GuidSymbol name="guidCodeGuardianPackage" value="{a246d773-b62f-480f-bc88-fcd1db7ceacf}" />
+
+    <!-- GUID do command set -->
+    <GuidSymbol name="guidCodeGuardianCommandSet" value="{cba21ca3-11fa-4bbd-ab57-fc1d83a2ea95}">
+      <!-- Grupos -->
+      <IDSymbol name="grpCodeGuardianTools"   value="0x1000" />
+      <IDSymbol name="grpCodeGuardianContext" value="0x1001" />
+
+      <!-- Comandos — IDs devem corresponder aos CommandId nas classes C# -->
+      <IDSymbol name="cmdOpenToolWindow"  value="0x0100" />
+      <IDSymbol name="cmdAnalyzeFile"     value="0x0101" />
+      <IDSymbol name="cmdAnalyzeSolution" value="0x0102" />
+      <IDSymbol name="cmdInstallHooks"    value="0x0103" />
+    </GuidSymbol>
+  </Symbols>
+
+</CommandTable>
