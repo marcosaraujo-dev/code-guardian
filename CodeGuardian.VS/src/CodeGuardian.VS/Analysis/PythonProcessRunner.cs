@@ -15,6 +15,11 @@ namespace CodeGuardian.VS.Analysis
     {
         private static readonly string[] CandidatosPython = { "python", "py" };
 
+        // Cache do executável que funcionou — evita re-probing a cada análise
+        private string? _exeValidado;
+        private string? _exeConfigurado;
+        private readonly object _cacheLock = new object();
+
         /// <summary>
         /// Executa o script Python e retorna o stdout completo como string.
         /// </summary>
@@ -33,6 +38,37 @@ namespace CodeGuardian.VS.Analysis
             string workingDir,
             CancellationToken ct = default)
         {
+            // Ler cache fora do lock para não bloquear thread async
+            string? exeCache;
+            lock (_cacheLock)
+            {
+                if (_exeConfigurado != pythonExe)
+                {
+                    _exeValidado = null;
+                    _exeConfigurado = pythonExe;
+                }
+                exeCache = _exeValidado;
+            }
+
+            // Usar exe já validado — evita probing de candidatos a cada análise
+            if (exeCache != null)
+            {
+                try
+                {
+                    return await ExecutarProcessoAsync(exeCache, scriptPath, args, workingDir, ct);
+                }
+                catch (OperationCanceledException)
+                {
+                    throw;
+                }
+                catch (Exception ex) when (EhErroDePythonNaoEncontrado(ex))
+                {
+                    // Exe deixou de funcionar (desinstalado?): limpar cache e redescobrir
+                    lock (_cacheLock) { _exeValidado = null; }
+                }
+            }
+
+            // Probing: testar candidatos e cachear o primeiro que funcionar
             var candidatos = ObterCandidatos(pythonExe);
             Exception? ultimoErro = null;
 
@@ -40,7 +76,15 @@ namespace CodeGuardian.VS.Analysis
             {
                 try
                 {
-                    return await ExecutarProcessoAsync(candidato, scriptPath, args, workingDir, ct);
+                    var resultado = await ExecutarProcessoAsync(candidato, scriptPath, args, workingDir, ct);
+
+                    lock (_cacheLock)
+                    {
+                        _exeValidado = candidato;
+                        _exeConfigurado = pythonExe;
+                    }
+
+                    return resultado;
                 }
                 catch (PythonNotFoundException)
                 {

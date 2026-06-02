@@ -18,8 +18,9 @@ namespace CodeGuardian.VS.Editor
     {
         private readonly ITextView _textView;
         private readonly ITextBuffer _buffer;
-        private readonly IGuardianAnalysisService? _analysisService;
+        private IGuardianAnalysisService? _analysisService;
         private List<ITagSpan<IErrorTag>> _tags = new List<ITagSpan<IErrorTag>>();
+        private bool _disposed;
 
         public event EventHandler<SnapshotSpanEventArgs>? TagsChanged;
 
@@ -31,6 +32,18 @@ namespace CodeGuardian.VS.Editor
 
             if (_analysisService != null)
                 _analysisService.AnalysisCompleted += AoAnaliseCompleta;
+        }
+
+        /// <summary>
+        /// Conecta o serviço de análise de forma tardia, quando o package termina de inicializar.
+        /// Chamado pelo GuardianTaggerProvider quando CreateTagger recebe serviço nulo.
+        /// </summary>
+        public void ConectarServico(IGuardianAnalysisService? service)
+        {
+            if (service == null || _analysisService != null || _disposed)
+                return;
+            _analysisService = service;
+            _analysisService.AnalysisCompleted += AoAnaliseCompleta;
         }
 
         public IEnumerable<ITagSpan<IErrorTag>> GetTags(NormalizedSnapshotSpanCollection spans)
@@ -135,6 +148,8 @@ namespace CodeGuardian.VS.Editor
 
         public void Dispose()
         {
+            if (_disposed) return;
+            _disposed = true;
             if (_analysisService != null)
                 _analysisService.AnalysisCompleted -= AoAnaliseCompleta;
         }

@@ -1,0 +1,82 @@
+name: Build e Publicar VSIX no Marketplace
+
+on:
+  push:
+    branches: [ master ]
+    paths:
+      - 'CodeGuardian.VS/**'
+  workflow_dispatch:
+    inputs:
+      force_publish:
+        description: 'Forçar publicação mesmo sem mudanças no VSIX'
+        required: false
+        default: 'false'
+        type: boolean
+
+jobs:
+  build-and-publish:
+    runs-on: windows-2022
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configurar NuGet
+        uses: NuGet/setup-nuget@v2
+
+      - name: Restaurar pacotes NuGet
+        run: nuget restore CodeGuardian.VS\CodeGuardian.VS.sln
+
+      # devenv /Build é equivalente a Ctrl+Shift+B no VS IDE e garante a geração do VSIX
+      - name: Build Release via devenv
+        run: |
+          $devenv = "${env:ProgramFiles}\Microsoft Visual Studio\2022\Enterprise\Common7\IDE\devenv.com"
+          if (-not (Test-Path $devenv)) {
+            $devenv = "${env:ProgramFiles}\Microsoft Visual Studio\2022\Community\Common7\IDE\devenv.com"
+          }
+          Write-Host "Usando devenv: $devenv"
+          & $devenv "CodeGuardian.VS\CodeGuardian.VS.sln" /Build "Release" /Out build-output.txt
+          Get-Content build-output.txt -ErrorAction SilentlyContinue | Select-Object -Last 20
+        shell: pwsh
+
+      - name: Localizar VSIX gerado
+        id: find_vsix
+        run: |
+          $vsix = Get-ChildItem "CodeGuardian.VS" -Recurse -Filter "*.vsix" |
+                  Sort-Object LastWriteTime -Descending |
+                  Select-Object -First 1
+          if (-not $vsix) {
+            Write-Error "VSIX não encontrado após o build!"
+            exit 1
+          }
+          Write-Host "VSIX: $($vsix.FullName) ($([math]::Round($vsix.Length/1KB,0)) KB)"
+          echo "vsix_path=$($vsix.FullName)" >> $env:GITHUB_OUTPUT
+        shell: pwsh
+
+      - name: Upload VSIX como artefato
+        uses: actions/upload-artifact@v4
+        with:
+          name: CodeGuardian-${{ github.ref_name }}-vsix
+          path: ${{ steps.find_vsix.outputs.vsix_path }}
+          retention-days: 30
+
+      # Publicar no Visual Studio Marketplace
+      # Pré-requisito: adicionar secret MARKETPLACE_PAT no repositório GitHub
+      # (Settings → Secrets and variables → Actions → New repository secret)
+      # O PAT deve ser gerado em: https://marketplace.visualstudio.com/manage
+      - name: Publicar no VS Marketplace
+        if: github.ref == 'refs/heads/master'
+        env:
+          MARKETPLACE_PAT: ${{ secrets.MARKETPLACE_PAT }}
+        run: |
+          $vsixPublisher = "${env:ProgramFiles}\Microsoft Visual Studio\2022\Enterprise\VSSDK\VisualStudioIntegration\Tools\Bin\VsixPublisher.exe"
+          if (-not (Test-Path $vsixPublisher)) {
+            $vsixPublisher = "${env:ProgramFiles}\Microsoft Visual Studio\2022\Community\VSSDK\VisualStudioIntegration\Tools\Bin\VsixPublisher.exe"
+          }
+          Write-Host "VsixPublisher: $vsixPublisher"
+          & $vsixPublisher publish `
+            -payload "${{ steps.find_vsix.outputs.vsix_path }}" `
+            -publishManifest "CodeGuardian.VS\publish-manifest.json" `
+            -personalAccessToken "$env:MARKETPLACE_PAT" `
+            -ignoreWarnings "VSIXValidatorWarning01,VSIXValidatorWarning02"
+        shell: pwsh

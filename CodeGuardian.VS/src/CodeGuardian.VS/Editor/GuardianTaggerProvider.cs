@@ -1,4 +1,5 @@
 using System.ComponentModel.Composition;
+using System.Threading.Tasks;
 using CodeGuardian.VS.Analysis;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text;
@@ -31,11 +32,34 @@ namespace CodeGuardian.VS.Editor
             // Singleton por buffer — evita criar múltiplos taggers para o mesmo arquivo
             return buffer.Properties.GetOrCreateSingletonProperty(() =>
             {
+                // GetService pode retornar null se o package ainda não terminou InitializeAsync.
+                // Com IsAsyncQueryable=true não causa deadlock — retorna null em vez de bloquear.
                 var service = ServiceProvider.GetService(typeof(SGuardianAnalysisService))
                               as IGuardianAnalysisService;
 
-                return new GuardianTagger(textView, buffer, service);
+                var tagger = new GuardianTagger(textView, buffer, service);
+
+                // Serviço não disponível ainda: conectar de forma assíncrona sem bloquear a UI
+                if (service == null)
+                    _ = ConectarServicoAsync(tagger);
+
+                return tagger;
             }) as ITagger<T>;
+        }
+
+        /// <summary>
+        /// Aguarda o package terminar de carregar e conecta o serviço ao tagger já criado.
+        /// Evita qualquer bloqueio na UI thread durante a abertura do primeiro arquivo .cs.
+        /// </summary>
+        private static async Task ConectarServicoAsync(GuardianTagger tagger)
+        {
+            // Aguardar a inicialização async do package sem bloquear nada
+            await Task.Delay(2000).ConfigureAwait(false);
+
+            var service = await AsyncServiceProvider.GlobalProvider
+                .GetServiceAsync(typeof(SGuardianAnalysisService)) as IGuardianAnalysisService;
+
+            tagger.ConectarServico(service);
         }
     }
 }

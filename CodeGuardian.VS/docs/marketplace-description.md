@@ -143,6 +143,14 @@ Go to **Tools → Options → Code Guardian** to configure:
 
 ## Release Notes
 
+### 1.0.1
+- **Performance:** Git hooks check moved off the UI thread — eliminates freeze on solution open
+- **Performance:** Tagger service resolution made fully async — prevents deadlock when opening first .cs file
+- **Performance:** Debounce (1.5s) added on save — avoids spawning multiple Python processes on rapid saves
+- **Performance:** Python executable cached after first discovery — no more re-probing `python`/`py` on each analysis
+- **Performance:** Analysis cache TTL increased from 30s to 5 minutes
+- **Fix:** Double settings read in `GuardianAnalysisService` eliminated
+
 ### 1.0.0
 - Initial release
 - Rule Engine with 20+ rules (security, reliability, performance, clean code)

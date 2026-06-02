@@ -14,7 +14,8 @@ namespace CodeGuardian.VS.Analysis
 
         public AnalysisCache(TimeSpan? ttl = null)
         {
-            _ttl = ttl ?? TimeSpan.FromSeconds(30);
+            // TTL de 5 minutos: evita re-análise desnecessária em edições normais
+            _ttl = ttl ?? TimeSpan.FromMinutes(5);
         }
 
         /// <summary>

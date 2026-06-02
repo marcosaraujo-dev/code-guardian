@@ -1,0 +1,24 @@
+{
+    "$schema": "http://json.schemastore.org/vsix-publish",
+    "categories": [
+        "Coding",
+        "Other"
+    ],
+    "identity": {
+        "internalName": "CodeGuardian"
+    },
+    "overview": "docs/marketplace-description.md",
+    "priceCategory": "free",
+    "publisher": "MarcosAraujo",
+    "private": false,
+    "qna": false,
+    "repo": "https://github.com/marcosaraujo-dev/code-guardian",
+    "tags": [
+        "code review",
+        "code analysis",
+        "C#",
+        "quality",
+        "security",
+        "static analysis"
+    ]
+}

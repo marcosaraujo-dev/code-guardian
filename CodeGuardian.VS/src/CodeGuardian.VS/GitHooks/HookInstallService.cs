@@ -30,6 +30,7 @@ namespace CodeGuardian.VS.GitHooks
         /// <summary>
         /// Verifica os hooks e exibe InfoBar se nao instalados.
         /// Deve ser chamado no InitializeAsync do package, apos SwitchToMainThreadAsync.
+        /// O I/O de sistema de arquivos é feito em background para não bloquear a UI thread.
         /// </summary>
         public async Task CheckAndPromptAsync()
         {
@@ -39,11 +40,16 @@ namespace CodeGuardian.VS.GitHooks
             if (string.IsNullOrEmpty(solutionDir))
                 return;
 
-            var gitDir = EncontrarDiretorioGit(solutionDir!);
-            if (gitDir == null)
-                return;
+            // I/O de sistema de arquivos SEMPRE em background — nunca na UI thread
+            var (gitDir, instalado) = await Task.Run(() =>
+            {
+                var dir = EncontrarDiretorioGit(solutionDir!);
+                if (dir == null)
+                    return ((string?)null, true);
+                return (dir, AreHooksInstalled(dir));
+            });
 
-            if (AreHooksInstalled(gitDir))
+            if (gitDir == null || instalado)
                 return;
 
             await ExibirInfoBarAsync(gitDir, solutionDir!);

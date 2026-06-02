@@ -71,7 +71,7 @@ namespace CodeGuardian.VS.Analysis
             try
             {
                 var configuracoes = ObterConfiguracoes();
-                var runnerPath = LocalizarRunnerPy(filePath);
+                var runnerPath = LocalizarRunnerPy(filePath, configuracoes);
 
                 if (runnerPath == null)
                 {
@@ -164,12 +164,10 @@ namespace CodeGuardian.VS.Analysis
 
         /// <summary>
         /// Descobre o caminho do runner.py subindo a árvore de diretórios.
-        /// Usa o campo RunnerScriptPath de Settings como fallback.
+        /// Recebe cfg já obtido pelo chamador para evitar leitura dupla de configurações.
         /// </summary>
-        private string? LocalizarRunnerPy(string pontoDepartida)
+        private static string? LocalizarRunnerPy(string pontoDepartida, CodeGuardianSettings cfg)
         {
-            var cfg = ObterConfiguracoes();
-
             // Override configurado pelo usuário
             if (!string.IsNullOrWhiteSpace(cfg.RunnerScriptPath) && File.Exists(cfg.RunnerScriptPath))
                 return cfg.RunnerScriptPath;

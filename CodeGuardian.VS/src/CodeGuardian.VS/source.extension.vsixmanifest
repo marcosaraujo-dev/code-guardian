@@ -4,7 +4,7 @@
                  xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
   <Metadata>
     <Identity Id="CodeGuardian.VS.bb4a2eab-5a25-4ab4-aca9-a55dee5fbf9c"
-              Version="1.0.0"
+              Version="1.0.1"
               Language="pt-BR"
               Publisher="Marcos Araujo" />
     <DisplayName>Code Guardian</DisplayName>

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Runtime.InteropServices;
 using System.Threading;
 using CodeGuardian.VS.Analysis;
@@ -29,10 +30,16 @@ namespace CodeGuardian.VS.Package
     [Guid("a246d773-b62f-480f-bc88-fcd1db7ceacf")]
     public sealed class CodeGuardianPackage : AsyncPackage, IVsRunningDocTableEvents, ICodeGuardianSettingsProvider
     {
+        private const int DEBOUNCE_DELAY_MS = 1500;
+
         private GuardianAnalysisService? _analysisService;
         private GuardianErrorListService? _errorListService;
         private HookInstallService? _hookService;
         private uint _rdtCookie;
+
+        // Debounce: evita disparar análise múltipla quando o arquivo é salvo rapidamente
+        private readonly ConcurrentDictionary<string, CancellationTokenSource> _debounceTokens =
+            new ConcurrentDictionary<string, CancellationTokenSource>(StringComparer.OrdinalIgnoreCase);
 
         protected override async Task InitializeAsync(CancellationToken cancellationToken, IProgress<ServiceProgressData> progress)
         {
@@ -124,6 +131,24 @@ namespace CodeGuardian.VS.Package
                 if (!cfg.AnalyzeOnSave)
                     return;
 
+                // Debounce: cancelar análise pendente se o arquivo for salvo novamente em menos de 1.5s
+                if (_debounceTokens.TryRemove(moniker, out var anterior))
+                    anterior.Cancel();
+
+                var debounce = new CancellationTokenSource();
+                _debounceTokens[moniker] = debounce;
+
+                try
+                {
+                    await System.Threading.Tasks.Task.Delay(DEBOUNCE_DELAY_MS, debounce.Token).ConfigureAwait(false);
+                }
+                catch (OperationCanceledException)
+                {
+                    return; // Novo save chegou para este arquivo — esta análise é descartada
+                }
+
+                _debounceTokens.TryRemove(moniker, out _);
+
                 if (_analysisService != null)
                     await _analysisService.AnalyzeFileAsync(moniker);
             });
@@ -144,6 +169,10 @@ namespace CodeGuardian.VS.Package
             ThreadHelper.ThrowIfNotOnUIThread();
             if (disposing)
             {
+                // Cancelar todas as análises com debounce pendentes
+                foreach (var cts in _debounceTokens.Values)
+                    cts.Cancel();
+                _debounceTokens.Clear();
 
                 if (_rdtCookie != 0)
                 {
