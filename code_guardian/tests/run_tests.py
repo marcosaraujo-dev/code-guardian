@@ -583,7 +583,7 @@ def test_runner():
 # ---------------------------------------------------------------------------
 
 def _find_guardian_dir() -> Path:
-    """Retorna .guardian/ na raiz do repositório git, ou próximo ao script."""
+    """Retorna .codeguardian/ na raiz do repositório git, ou próximo ao script."""
     try:
         import subprocess as _sp
         root = _sp.run(
@@ -591,14 +591,14 @@ def _find_guardian_dir() -> Path:
             capture_output=True, text=True, timeout=5,
         ).stdout.strip()
         if root:
-            return Path(root) / ".guardian"
+            return Path(root) / ".codeguardian"
     except Exception:
         pass
-    return BASE.parent.parent.parent / ".guardian"  # raiz do repo estimada
+    return BASE.parent.parent.parent / ".codeguardian"  # raiz do repo estimada
 
 
 def generate_html_report(elapsed: float) -> None:
-    """Gera relatório HTML dos testes em .guardian/last-test-report.html."""
+    """Gera relatório HTML dos testes em .codeguardian/last-test-report.html."""
     from datetime import datetime
 
     total  = len(_results)

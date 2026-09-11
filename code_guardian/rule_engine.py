@@ -223,13 +223,67 @@ class Issue:
 def _is_comment_or_string(line: str, match_start: int) -> bool:
     """Verifica se o match está dentro de comentário ou string."""
     stripped = line.strip()
-    # Linha inteira é comentário
     if stripped.startswith("//") or stripped.startswith("*") or stripped.startswith("/*"):
         return True
-    # Match está após // na mesma linha
     comment_idx = line.find("//")
     if comment_idx != -1 and comment_idx < match_start:
         return True
+    return False
+
+
+def _extract_suppress_ids(line_stripped: str, directive: str) -> list[str] | None:
+    """
+    Extrai os IDs de supressão de uma linha que contém o diretivo guardian.
+    Aceita // e /// (XML doc comment). Retorna lista de IDs ou None se não for
+    um diretivo de supressão.
+    """
+    lower = line_stripped.lower()
+    for prefix in (f"/// {directive}", f"// {directive}"):
+        if lower.startswith(prefix):
+            ids_part = line_stripped[len(prefix):].strip()
+            return [r.strip().upper() for r in ids_part.split(",") if r.strip()]
+    return None
+
+
+def _get_file_suppressions(lines: list[str]) -> set[str]:
+    """
+    Lê as primeiras 30 linhas procurando por:
+        // guardian: file-suppress RULE_ID1,RULE_ID2
+        /// guardian: file-suppress RULE_ID1,RULE_ID2  (aceita /// também)
+    Retorna um conjunto com os IDs suprimidos para o arquivo inteiro.
+    """
+    suppressed: set[str] = set()
+    for line in lines[:30]:
+        ids = _extract_suppress_ids(line.strip(), "guardian: file-suppress")
+        if ids is not None:
+            suppressed.update(ids)
+    return suppressed
+
+
+def _is_line_suppressed(lines: list[str], line_num: int, rule_id: str) -> bool:
+    """
+    Verifica se há '// guardian: suppress RULE_ID' (ou ///) antes da declaração.
+    Percorre para trás ignorando doc comments (///), atributos ([...]) e
+    linhas em branco, pois em C# essas linhas ficam entre o suppress e a
+    declaração da propriedade/método.
+    """
+    for i in range(line_num - 2, max(-1, line_num - 30), -1):
+        stripped = lines[i].strip()
+
+        # Verificar suppress ANTES de decidir pular (aceita // e ///)
+        ids = _extract_suppress_ids(stripped, "guardian: suppress")
+        if ids is not None:
+            return rule_id.upper() in ids
+
+        # Ignorar: linhas vazias, doc comments ///, atributos [...]
+        if (not stripped
+                or stripped.lower().startswith("///")
+                or (stripped.startswith("[") and "]" in stripped)):
+            continue
+
+        # Qualquer outro código interrompe a busca
+        break
+
     return False
 
 
@@ -257,9 +311,16 @@ def analyze_file(file_path: str, min_severity: str = "info") -> list[Issue]:
         )]
 
     content = "".join(lines)
+    file_suppressions = _get_file_suppressions(lines)
 
     for rule in RULES:
         if severity_order.get(rule["severity"], 3) > min_level:
+            continue
+
+        rule_id = rule["id"]
+
+        # Regra suprimida para o arquivo inteiro
+        if rule_id in file_suppressions:
             continue
 
         if "pattern_regex" in rule:
@@ -272,8 +333,11 @@ def analyze_file(file_path: str, min_severity: str = "info") -> list[Issue]:
                     if _is_comment_or_string(line_content, col_in_line):
                         continue
 
+                    if _is_line_suppressed(lines, line_num, rule_id):
+                        continue
+
                     # Evitar duplicatas na mesma linha para a mesma regra
-                    if any(i.line == line_num and i.rule_id == rule["id"] for i in issues):
+                    if any(i.line == line_num and i.rule_id == rule_id for i in issues):
                         continue
 
                     issues.append(Issue(
@@ -281,7 +345,7 @@ def analyze_file(file_path: str, min_severity: str = "info") -> list[Issue]:
                         line=line_num,
                         severity=rule["severity"],
                         category=rule["category"],
-                        rule_id=rule["id"],
+                        rule_id=rule_id,
                         message=rule["message"]
                     ))
             except re.error:
@@ -292,12 +356,14 @@ def analyze_file(file_path: str, min_severity: str = "info") -> list[Issue]:
                 if not rule.get("skip_comment_filter") and _is_comment_or_string(line, line.find(rule["pattern"])):
                     continue
                 if rule["pattern"] in line:
+                    if _is_line_suppressed(lines, i, rule_id):
+                        continue
                     issues.append(Issue(
                         file=file_path,
                         line=i,
                         severity=rule["severity"],
                         category=rule["category"],
-                        rule_id=rule["id"],
+                        rule_id=rule_id,
                         message=rule["message"]
                     ))
 

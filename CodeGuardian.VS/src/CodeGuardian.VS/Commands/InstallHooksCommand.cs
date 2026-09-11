@@ -50,7 +50,11 @@ namespace CodeGuardian.VS.Commands
             if (string.IsNullOrEmpty(solutionDir))
                 return;
 
-            await _hookService.InstallHooksAsync(solutionDir!);
+            var gitDir = HookInstallService.EncontrarDiretorioGit(solutionDir!);
+            if (gitDir == null)
+                return;
+
+            await _hookService.InstallHooksAsync(gitDir);
         }
 
         private static string? ObterDiretorioDaSolution()

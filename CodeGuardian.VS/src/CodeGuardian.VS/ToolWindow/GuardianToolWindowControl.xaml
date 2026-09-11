@@ -54,12 +54,116 @@
     <ScrollViewer VerticalScrollBarVisibility="Auto">
         <StackPanel Margin="12">
 
-            <!-- Logo Code Guardian -->
+            <!-- Banner de dependências ausentes -->
+            <Border x:Name="BannerDependencias"
+                    Background="#FFB7410E"
+                    CornerRadius="4"
+                    Padding="10,8"
+                    Margin="0,0,0,8"
+                    Visibility="{Binding HasDependencyError, Converter={x:Static local:BoolToVisibilityConverter.Instance}}">
+                <DockPanel LastChildFill="True">
+                    <Button DockPanel.Dock="Right"
+                            Content="Como resolver"
+                            Padding="8,3"
+                            Margin="8,0,0,0"
+                            Background="#FF8B2500"
+                            Foreground="White"
+                            BorderThickness="0"
+                            FontSize="10"
+                            VerticalAlignment="Center"
+                            Click="BtnConfigurarDependencias_Click" />
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock FontSize="11"
+                                   FontWeight="Bold"
+                                   Foreground="White"
+                                   Text="Dependências ausentes" />
+                        <TextBlock FontSize="10"
+                                   Foreground="#FFFFCCAA"
+                                   Text="{Binding DependencyErrorMessage, Mode=OneWay}"
+                                   TextWrapping="Wrap"
+                                   Margin="0,2,0,0" />
+                    </StackPanel>
+                </DockPanel>
+            </Border>
+
+            <!-- Logo + botões de ação na mesma linha -->
+            <Border Background="#FF2D2D2D" CornerRadius="4" Padding="10,8" Margin="0,0,0,8">
+                <DockPanel LastChildFill="False">
+
+                    <Image DockPanel.Dock="Left"
+                           Source="pack://application:,,,/CodeGuardian.VS;component/Resources/logo-codeguardian.png"
+                           Height="40"
+                           VerticalAlignment="Center"
+                           RenderOptions.BitmapScalingMode="HighQuality" />
+
+                    <UniformGrid DockPanel.Dock="Right"
+                                 Columns="2"
+                                 VerticalAlignment="Center"
+                                 Margin="8,0,0,0">
+
+                        <Button x:Name="BtnAnalisarArquivo"
+                                Content="Arquivo"
+                                Padding="8,5"
+                                Margin="0,0,2,2"
+                                Background="#FF0E639C" Foreground="White" BorderThickness="0"
+                                FontSize="11"
+                                IsEnabled="{Binding IsNotAnalyzing, Mode=OneWay}"
+                                ToolTip="Analisa o arquivo .cs ativo no editor"
+                                Click="BtnAnalisarArquivo_Click" />
+
+                        <Button x:Name="BtnAnalisarSolucao"
+                                Content="Solution"
+                                Padding="8,5"
+                                Margin="2,0,0,2"
+                                Background="#FF6A1B9A" Foreground="White" BorderThickness="0"
+                                FontSize="11"
+                                IsEnabled="{Binding IsNotAnalyzing, Mode=OneWay}"
+                                ToolTip="Analisa todos os arquivos .cs da solution"
+                                Click="BtnAnalisarSolucao_Click" />
+
+                        <Button x:Name="BtnAnalisarIncremental"
+                                Content="Incremental"
+                                Padding="8,5"
+                                Margin="0,2,2,0"
+                                Background="#FF795548" Foreground="White" BorderThickness="0"
+                                FontSize="11"
+                                IsEnabled="{Binding IsNotAnalyzing, Mode=OneWay}"
+                                ToolTip="Analisa apenas arquivos modificados no git diff (HEAD)"
+                                Click="BtnAnalisarIncremental_Click" />
+
+                        <Button x:Name="BtnToggleIA"
+                                Content="{Binding ToggleIALabel, Mode=OneWay}"
+                                Background="{Binding ToggleIABackground, Mode=OneWay}"
+                                Padding="8,5"
+                                Margin="2,2,0,0"
+                                Foreground="White" BorderThickness="0"
+                                FontSize="11"
+                                ToolTip="Habilita análise com IA (mais lenta, mais completa)"
+                                Click="BtnToggleIA_Click" />
+
+                    </UniformGrid>
+                </DockPanel>
+            </Border>
+
+            <!-- Git Hooks -->
+            <TextBlock Style="{StaticResource EstiloRotuloSecao}" Text="GIT HOOKS" />
             <Border Background="#FF2D2D2D" CornerRadius="4" Padding="12,10" Margin="0,0,0,8">
-                <Image Source="pack://application:,,,/CodeGuardian.VS;component/Resources/logo-codeguardian.png"
-                       Height="48"
-                       HorizontalAlignment="Left"
-                       RenderOptions.BitmapScalingMode="HighQuality" />
+                <DockPanel LastChildFill="False">
+                    <StackPanel DockPanel.Dock="Left" Orientation="Horizontal" VerticalAlignment="Center">
+                        <Ellipse Width="10" Height="10"
+                                 Fill="{Binding HookStatusColor, Mode=OneWay}"
+                                 VerticalAlignment="Center" />
+                        <TextBlock Text="{Binding HookStatusLabel, Mode=OneWay}"
+                                   Foreground="White" FontSize="12"
+                                   Margin="8,0,0,0" VerticalAlignment="Center" />
+                    </StackPanel>
+                    <Button x:Name="BtnToggleHook"
+                            DockPanel.Dock="Right"
+                            Content="{Binding HookBotaoLabel, Mode=OneWay}"
+                            Background="{Binding HookBotaoBackground, Mode=OneWay}"
+                            Padding="10,4" Foreground="White" BorderThickness="0" FontSize="11"
+                            Click="BtnToggleHook_Click" />
+                </DockPanel>
             </Border>
 
             <!-- Cabecalho: Risk Score -->
@@ -97,28 +201,43 @@
                             <TextBlock FontSize="11"
                                        Foreground="#FF888888"
                                        Text="score de 0 a 100" />
+                            <!-- Tendência histórica -->
+                            <TextBlock FontSize="11" FontWeight="Bold"
+                                       Foreground="{Binding TendenciaCor, Mode=OneWay}"
+                                       Text="{Binding TendenciaLabel, Mode=OneWay}"
+                                       Visibility="{Binding TendenciaLabel, Converter={x:Static local:StringNotEmptyToVisibilityConverter.Instance}, Mode=OneWay}"
+                                       ToolTip="Variação em relação à última análise exportada (guardian-metrics.json)" />
                         </StackPanel>
                     </StackPanel>
                 </StackPanel>
             </Border>
 
-            <!-- Indicador de analise em andamento -->
-            <StackPanel Orientation="Horizontal"
-                        Margin="0,6,0,0"
-                        Visibility="{Binding IsAnalyzing, Converter={x:Static local:BoolToVisibilityConverter.Instance}}">
-                <ProgressBar IsIndeterminate="True"
-                             Height="4"
-                             HorizontalAlignment="Stretch"
-                             Background="Transparent"
-                             Foreground="#FF4FC3F7"
-                             Width="200" />
-                <TextBlock Text="{Binding StatusMessage}"
-                           FontSize="10"
-                           Foreground="#FF4FC3F7"
-                           Margin="8,0,0,0"
-                           VerticalAlignment="Center" />
-            </StackPanel>
+            <!-- Indicador de análise em andamento -->
+            <Border Background="#FF0D2137"
+                    CornerRadius="4"
+                    Padding="10,8"
+                    Margin="0,6,0,0"
+                    Visibility="{Binding IsAnalyzing, Converter={x:Static local:BoolToVisibilityConverter.Instance}}">
+                <StackPanel>
+                    <ProgressBar IsIndeterminate="True"
+                                 Height="6"
+                                 BorderThickness="0"
+                                 Margin="0,0,0,6">
+                        <ProgressBar.Foreground>
+                            <SolidColorBrush Color="#FF4FC3F7" />
+                        </ProgressBar.Foreground>
+                        <ProgressBar.Background>
+                            <SolidColorBrush Color="#FF1A3A5C" />
+                        </ProgressBar.Background>
+                    </ProgressBar>
+                    <TextBlock Text="{Binding StatusMessage}"
+                               FontSize="11"
+                               Foreground="#FF4FC3F7"
+                               TextWrapping="Wrap" />
+                </StackPanel>
+            </Border>
 
+            <!-- Mensagem de status quando não está analisando -->
             <TextBlock Text="{Binding StatusMessage}"
                        FontSize="10"
                        Foreground="#FF888888"
@@ -194,30 +313,78 @@
                 </Grid>
             </Border>
 
-            <!-- Lista de Issues individuais -->
-            <ItemsControl ItemsSource="{Binding Issues}" Margin="0,4,0,0">
-                <ItemsControl.ItemTemplate>
+            <!-- Filtros de issues -->
+            <Grid Margin="0,6,0,2">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <ComboBox Grid.Column="0"
+                          Width="90" Margin="0,0,6,0"
+                          Background="#FF3D3D3D" Foreground="White"
+                          BorderBrush="#FF555555" FontSize="11"
+                          SelectedItem="{Binding FiltroSeveridade, Mode=TwoWay}">
+                    <ComboBoxItem>Todos</ComboBoxItem>
+                    <ComboBoxItem>CRITICAL</ComboBoxItem>
+                    <ComboBoxItem>ERROR</ComboBoxItem>
+                    <ComboBoxItem>WARNING</ComboBoxItem>
+                    <ComboBoxItem>INFO</ComboBoxItem>
+                </ComboBox>
+                <Grid Grid.Column="1">
+                    <TextBox Text="{Binding FiltroTexto, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                             Background="#FF3D3D3D" Foreground="White"
+                             CaretBrush="White" BorderBrush="#FF555555"
+                             FontSize="11" Padding="4,2" />
+                    <TextBlock Text="Filtrar por texto..."
+                               Foreground="#FF777777" FontSize="11"
+                               Margin="5,2,0,0" IsHitTestVisible="False"
+                               VerticalAlignment="Center"
+                               Visibility="{Binding FiltroTexto, Converter={x:Static local:StringNotEmptyToVisibilityConverter.Instance}, ConverterParameter=inverse, Mode=OneWay}" />
+                </Grid>
+            </Grid>
+
+            <!-- Lista de Issues individuais (navegável por clique) -->
+            <ListBox x:Name="ListBoxIssues"
+                     ItemsSource="{Binding IssuesView}"
+                     Background="Transparent" BorderThickness="0"
+                     HorizontalContentAlignment="Stretch"
+                     ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                     SelectionChanged="ListBoxIssues_SelectionChanged">
+                <ListBox.ItemContainerStyle>
+                    <Style TargetType="ListBoxItem">
+                        <Setter Property="Padding" Value="0" />
+                        <Setter Property="Background" Value="Transparent" />
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                        <Setter Property="Cursor" Value="Hand" />
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#FF3A3A3A" />
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter Property="Background" Value="Transparent" />
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </ListBox.ItemContainerStyle>
+                <ListBox.ItemTemplate>
                     <DataTemplate>
-                        <Border Background="#FF2D2D2D" CornerRadius="3" Margin="0,2,0,0" Padding="8,6">
+                        <Border Background="Transparent" CornerRadius="3" Margin="0,2,0,0" Padding="8,6">
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="6" />
                                     <ColumnDefinition Width="Auto" />
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
-                                <!-- Barra de severidade -->
                                 <Rectangle Grid.Column="0" Fill="{Binding SeverityColor}" RadiusX="2" RadiusY="2" Margin="0,0,6,0" />
-                                <!-- RuleId -->
                                 <TextBlock Grid.Column="1" Text="{Binding RuleId, Mode=OneWay}"
                                            FontSize="10" FontWeight="Bold"
                                            Foreground="{Binding SeverityColor, Mode=OneWay}"
                                            VerticalAlignment="Center" Margin="0,0,8,0" />
-                                <!-- Mensagem e nome do arquivo -->
                                 <StackPanel Grid.Column="2">
                                     <TextBlock Text="{Binding Message, Mode=OneWay}"
-                                               FontSize="11" Foreground="White"
-                                               TextWrapping="Wrap" />
+                                               FontSize="11" Foreground="White" TextWrapping="Wrap" />
                                     <TextBlock FontSize="10" Foreground="#FF888888" Margin="0,2,0,0"
                                                ToolTip="{Binding CaminhoCompleto, Mode=OneWay}">
                                         <Run Text="{Binding NomeArquivo, Mode=OneWay}" />
@@ -225,15 +392,29 @@
                                         <Run Text="{Binding Line, Mode=OneWay}" />
                                     </TextBlock>
                                 </StackPanel>
-                                <!-- Categoria -->
                                 <TextBlock Grid.Column="3" Text="{Binding Category, Mode=OneWay}"
                                            FontSize="9" Foreground="#FF666666"
-                                           VerticalAlignment="Top" Margin="6,0,0,0" />
+                                           VerticalAlignment="Top" Margin="6,0,4,0" />
+                                <!-- Ações do issue: copiar e suprimir -->
+                                <StackPanel Grid.Column="4" Orientation="Horizontal" VerticalAlignment="Top">
+                                    <Button Content="⎘" FontSize="11"
+                                            Padding="4,2" Margin="0,0,2,0"
+                                            Background="Transparent" Foreground="#FF888888"
+                                            BorderThickness="0"
+                                            ToolTip="{Binding TextoParaCopiar, Mode=OneWay}"
+                                            Click="BtnCopiarIssue_Click" />
+                                    <Button Content="✕" FontSize="9"
+                                            Padding="4,2"
+                                            Background="Transparent" Foreground="#FF666666"
+                                            BorderThickness="0"
+                                            ToolTip="Suprimir — insere '// guardian: suppress RULE_ID' acima da linha"
+                                            Click="BtnSuprimirIssue_Click" />
+                                </StackPanel>
                             </Grid>
                         </Border>
                     </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
+                </ListBox.ItemTemplate>
+            </ListBox>
 
             <!-- Metricas por Arquivo -->
             <TextBlock Style="{StaticResource EstiloRotuloSecao}"
@@ -301,12 +482,28 @@
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
 
-            <!-- Botão para abrir o relatório HTML completo -->
-            <Button x:Name="BtnAbrirRelatorio" Content="Abrir Relatório HTML"
-                    Margin="0,12,0,0" Padding="12,6"
-                    Background="#FF0E639C" Foreground="White" BorderThickness="0"
-                    FontSize="12" HorizontalAlignment="Left"
-                    Click="BtnAbrirRelatorio_Click" />
+            <!-- Botões de exportação e limpeza -->
+            <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
+                <Button x:Name="BtnLimpar" Content="Limpar"
+                        Padding="12,6" Margin="0,0,8,0"
+                        Background="#FF444444" Foreground="White" BorderThickness="0"
+                        FontSize="12"
+                        ToolTip="Limpa os resultados da análise atual"
+                        Click="BtnLimpar_Click" />
+
+                <Button x:Name="BtnAbrirRelatorio" Content="Abrir Relatório HTML"
+                        Padding="12,6" Margin="0,0,8,0"
+                        Background="#FF0E639C" Foreground="White" BorderThickness="0"
+                        FontSize="12"
+                        Click="BtnAbrirRelatorio_Click" />
+
+                <Button x:Name="BtnExportarSarif" Content="Exportar SARIF"
+                        Padding="12,6"
+                        Background="#FF1E7E34" Foreground="White" BorderThickness="0"
+                        FontSize="12"
+                        ToolTip="Gera guardian-report.sarif em .guardian/ — compatível com GitHub Actions e Azure DevOps"
+                        Click="BtnExportarSarif_Click" />
+            </StackPanel>
 
         </StackPanel>
     </ScrollViewer>

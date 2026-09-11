@@ -51,7 +51,20 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument("--output",   default=None,  help="Caminho do relatório HTML de saída (opcional)")
     parser.add_argument("--format",   default="html", choices=["html", "text", "json"], help="Formato de saída (padrão: html)")
     parser.add_argument("--severity",  default="info", choices=["info", "warning", "error", "critical"], help="Severidade mínima a reportar (padrão: info)")
-    parser.add_argument("--diff-only", action="store_true", help="Reportar apenas issues nas linhas efetivamente alteradas (usa difflib)")
+    diff_group = parser.add_mutually_exclusive_group()
+    diff_group.add_argument(
+        "--diff-only",
+        dest="diff_only",
+        action="store_true",
+        default=True,
+        help="[padrão] Reportar apenas issues nas linhas efetivamente alteradas (usa difflib)",
+    )
+    diff_group.add_argument(
+        "--all-issues",
+        dest="diff_only",
+        action="store_false",
+        help="Reportar TODAS as issues do arquivo, não apenas nas linhas alteradas",
+    )
     return parser.parse_args()
 
 
@@ -65,7 +78,7 @@ def main() -> None:
     diff_only  = args.diff_only
     output_path: str | None = args.output
 
-    diff_tag = " | Modo: apenas linhas alteradas" if diff_only else ""
+    diff_tag = " | Modo: apenas linhas alteradas" if diff_only else " | Modo: todas as issues"
     print(f"\n{'═' * 60}", file=sys.stderr)
     print(f"  VB6 Compare — Code Review de Diferenças", file=sys.stderr)
     print(f"{'═' * 60}", file=sys.stderr)
@@ -124,7 +137,7 @@ def main() -> None:
     if output_fmt == "html":
         html_content = generate_html(plain_results, title=title, change_types=ct_map)
 
-        # Se não foi especificado --output, salva automaticamente em .guardian/
+        # Se não foi especificado --output, salva automaticamente em .codeguardian/
         if output_path is None:
             ts = datetime.now().strftime("%Y-%m-%d-%H%M")
             guardian = _find_guardian_dir()

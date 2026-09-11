@@ -1,7 +1,7 @@
 # Code Guardian for Visual Studio
 
 **Automated code review integrated into Visual Studio.**
-Code Guardian analyzes your C# files as you work — detecting security issues, bad practices, code smells, and quality metrics — and surfaces results directly in the Error List, Tool Window, and a full HTML report.
+Code Guardian analyzes your C# files on demand — detecting security issues, bad practices, code smells, quality metrics, and tracking risk trends — and surfaces results directly in the Error List, Tool Window, and exportable reports.
 
 ---
 
@@ -28,6 +28,9 @@ For each analyzed file:
 ### 🎯 Risk Score
 Every analysis produces a **Risk Score from 0 to 100** with a visual gauge — green (low risk) through red (critical). Useful for tracking quality over time.
 
+### 📈 Trend Tracking
+The panel shows whether quality improved or degraded compared to the previous analysis (`↑ piorou`, `↓ melhorou`, `= estável`). Full history stored in `.codeguardian/guardian-metrics.json` (up to 100 runs).
+
 ### 📋 Error List Integration
 All issues appear directly in the Visual Studio **Error List** with:
 - Severity (Error / Warning / Message)
@@ -37,11 +40,18 @@ All issues appear directly in the Visual Studio **Error List** with:
 
 ### 🪟 Tool Window Panel
 A dedicated side panel (**Tools → Code Guardian**) shows:
-- Risk Score with color-coded progress bar
-- Issue counts by severity (Critical / Error / Warning / Info)
-- Full list of individual issues with message, rule ID, file, and line
+- Risk Score with color-coded progress bar and trend indicator
+- Issue counts by severity (Critical / Error / Warning / Info) — tab title shows `Code Guardian (N)` for active critical+error issues
+- Filterable issue list (by severity and free text)
 - Code metrics per file (expandable)
-- **"Abrir Relatório HTML"** button — opens a self-contained HTML report in your default browser
+- AI toggle (full analysis vs. rules-only)
+- Buttons for file, solution, and incremental analysis
+
+### 🖱️ Click-to-Navigate
+Click any issue in the list to open the file at the exact line.
+
+### 📋 Copy & Suppress
+Each issue has a **⎘ copy** button (copies formatted text to clipboard) and a **✕ suppress** button (inserts `// guardian: suppress RULE_ID` automatically).
 
 ### 🌐 HTML Report
 One-click HTML report with dark theme, including:
@@ -49,10 +59,19 @@ One-click HTML report with dark theme, including:
 - Metrics table per file (color-coded cells)
 - Full issues table with severity badges
 
+### 📤 SARIF Export
+Exports results to **SARIF 2.1.0** format (`.codeguardian/guardian-report.sarif`), compatible with GitHub Actions Code Scanning, Azure DevOps, and any SARIF viewer.
+
 ### 🔗 Git Hooks Integration
 Optionally install a `pre-commit` hook that blocks commits containing critical issues:
 - **Tools → Code Guardian: Install Git Hooks**
 - Or via the InfoBar prompt that appears automatically when a solution without hooks is opened
+
+### ⚡ Incremental Analysis
+Analyze only files modified since the last commit (`git diff HEAD`) — much faster for active development sessions.
+
+### 🤖 AI Toggle
+Switch between full analysis (rules + AI) and fast analysis (rules only) directly from the panel.
 
 ---
 
@@ -67,7 +86,7 @@ Optionally install a `pre-commit` hook that blocks commits containing critical i
 ### Getting the scripts
 
 The analysis engine is the open-source **Code Guardian** Python scripts available at:
-👉 **[github.com/marcosaraujo-dev/code-guardian](https://github.com/marcosaraujo-dev/code-guardian)** *(update with your actual repo URL)*
+👉 **[github.com/marcosaraujo-dev/code-guardian](https://github.com/marcosaraujo-dev/code-guardian)**
 
 Clone or copy the `code_guardian/` folder into the root of your repository:
 
@@ -78,6 +97,7 @@ your-repo/
 │   ├── rule_engine.py
 │   ├── metrics.py
 │   ├── diff_parser.py
+│   ├── ai_client.py
 │   └── ...
 ├── src/
 └── ...
@@ -90,7 +110,7 @@ your-repo/
 1. **Install the extension** via the `.vsix` file or the VS Marketplace
 2. **Add the `code_guardian/` scripts** to your repository root (see above)
 3. **Open a solution** — Code Guardian loads automatically
-4. Go to **Tools → Analyze Current File (Code Guardian)** or right-click the solution node → **Analyze with Code Guardian**
+4. Go to **Tools → Analyze Current File (Code Guardian)** or open the panel at **Tools → Code Guardian**
 5. View results in the **Error List** and in **Tools → Code Guardian** panel
 
 ---
@@ -116,6 +136,21 @@ Go to **Tools → Options → Code Guardian** to configure:
 | **Analyze Current File** | Tools menu | Analyze the active `.cs` file |
 | **Analyze with Code Guardian** | Solution Explorer context menu | Full scan of the solution directory |
 | **Install Git Hooks** | Tools menu | Install pre-commit hook in the current repository |
+| **Export SARIF** | Tool Window / Tools menu | Export results as SARIF 2.1.0 |
+
+---
+
+## CI/CD Integration
+
+The exported `.codeguardian/guardian-report.sarif` can be consumed in pipelines:
+
+**GitHub Actions:**
+```yaml
+- name: Upload SARIF
+  uses: github/codeql-action/upload-sarif@v3
+  with:
+    sarif_file: .codeguardian/guardian-report.sarif
+```
 
 ---
 
@@ -143,13 +178,18 @@ Go to **Tools → Options → Code Guardian** to configure:
 
 ## Release Notes
 
-### 1.0.1
-- **Performance:** Git hooks check moved off the UI thread — eliminates freeze on solution open
-- **Performance:** Tagger service resolution made fully async — prevents deadlock when opening first .cs file
-- **Performance:** Debounce (1.5s) added on save — avoids spawning multiple Python processes on rapid saves
-- **Performance:** Python executable cached after first discovery — no more re-probing `python`/`py` on each analysis
-- **Performance:** Analysis cache TTL increased from 30s to 5 minutes
-- **Fix:** Double settings read in `GuardianAnalysisService` eliminated
+### 1.0.4
+- SARIF 2.1.0 export for CI/CD (GitHub Actions, Azure DevOps)
+- Execution history in `guardian-metrics.json` with visual trend indicator
+- Incremental analysis (only modified files via `git diff HEAD`)
+- AI Toggle — switch between full and rules-only analysis from the panel
+- Filters by severity and free text on the issues list
+- Click-to-navigate — opens file at the exact issue line
+- Copy issue button (formatted text to clipboard)
+- Suppress issue button (auto-inserts `// guardian: suppress RULE_ID`)
+- Tool Window tab shows critical+error count `Code Guardian (N)`
+- Progress bar during solution scan with current file name
+- Fixed Git Hooks install loop when a third-party hook already exists
 
 ### 1.0.0
 - Initial release
@@ -166,7 +206,7 @@ Go to **Tools → Options → Code Guardian** to configure:
 ## Feedback & Issues
 
 Found a bug or have a suggestion?
-👉 Open an issue at **[github.com/marcosaraujo-dev/code-guardian/issues](https://github.com/marcosaraujo-dev/code-guardian/issues)** *(update with your actual repo URL)*
+👉 Open an issue at **[github.com/marcosaraujo-dev/code-guardian/issues](https://github.com/marcosaraujo-dev/code-guardian/issues)**
 
 ---
 

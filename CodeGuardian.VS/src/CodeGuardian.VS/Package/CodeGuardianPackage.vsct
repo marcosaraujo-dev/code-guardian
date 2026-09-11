@@ -3,7 +3,7 @@
               xmlns:xs="http://www.w3.org/2001/XMLSchema">
 
   <!-- Definicao do arquivo de comandos para o Code Guardian -->
-  <!-- GUIDs: Package = a1b2c3d4-..., CommandSet = b2c3d4e5-... -->
+  <!-- GUIDs: Package = a246d773-b62f-480f-bc88-fcd1db7ceacf, CommandSet = cba21ca3-11fa-4bbd-ab57-fc1d83a2ea95 -->
 
   <Extern href="stdidcmd.h" />
   <Extern href="vsshlids.h" />
@@ -68,6 +68,17 @@
         </Strings>
       </Button>
 
+      <!-- Exportar SARIF (Tools > Code Guardian: Export SARIF) -->
+      <Button guid="guidCodeGuardianCommandSet" id="cmdExportSarif" priority="0x0104" type="Button">
+        <Parent guid="guidCodeGuardianCommandSet" id="grpCodeGuardianTools" />
+        <CommandFlag>DynamicVisibility</CommandFlag>
+        <Strings>
+          <ButtonText>Code Guardian: Export SARIF</ButtonText>
+          <MenuText>Code Guardian: Export &amp;SARIF</MenuText>
+          <ToolTipText>Exportar resultado da análise no formato SARIF 2.1.0 para integração com GitHub/Azure DevOps</ToolTipText>
+        </Strings>
+      </Button>
+
     </Buttons>
 
   </Commands>
@@ -87,6 +98,7 @@
       <IDSymbol name="cmdAnalyzeFile"     value="0x0101" />
       <IDSymbol name="cmdAnalyzeSolution" value="0x0102" />
       <IDSymbol name="cmdInstallHooks"    value="0x0103" />
+      <IDSymbol name="cmdExportSarif"     value="0x0104" />
     </GuidSymbol>
   </Symbols>
 

@@ -4,7 +4,7 @@ VB6 Rule Engine - Detecta padrões problemáticos em arquivos VB6 (.bas, .cls, .
 Execução rápida sem IA, baseada em regex, análise de blocos e sistema de score (0-100).
 
 Uso:
-    python vb6_rule_engine.py <arquivo.bas|.cls|.frm>                    # padrão: texto no terminal + HTML salvo em .guardian/
+    python vb6_rule_engine.py <arquivo.bas|.cls|.frm>                    # padrão: texto no terminal + HTML salvo em .codeguardian/
     python vb6_rule_engine.py <arquivo> --format html --output rel.html  # HTML salvo em arquivo específico
     python vb6_rule_engine.py <arquivo> --format json                    # JSON para integração (sem HTML)
     python vb6_rule_engine.py <arquivo> --output relatorio.html          # HTML salvo em arquivo específico
@@ -32,18 +32,18 @@ from pathlib import Path
 
 # ── Sistema de Log do Code Guardian ───────────────────────────────────────────
 def _setup_guardian_logger() -> logging.Logger:
-    """Configura logger com handler de arquivo em .guardian/logs/."""
+    """Configura logger com handler de arquivo em .codeguardian/logs/."""
     logger = logging.getLogger("code_guardian.vb6")
     if logger.handlers:
         return logger  # Já configurado
 
     logger.setLevel(logging.DEBUG)
 
-    # Diretório de logs: .guardian/logs/ ao lado do script ou cwd
+    # Diretório de logs: .codeguardian/logs/ ao lado do script ou cwd
     script_dir = Path(__file__).parent
-    candidate = script_dir.parent.parent / ".guardian" / "logs"
+    candidate = script_dir.parent.parent / ".codeguardian" / "logs"
     if not candidate.exists():
-        candidate = Path.cwd() / ".guardian" / "logs"
+        candidate = Path.cwd() / ".codeguardian" / "logs"
     candidate.mkdir(parents=True, exist_ok=True)
 
     log_file = candidate / f"vb6-{datetime.now().strftime('%Y-%m-%d')}.log"
@@ -390,7 +390,15 @@ def analyze_file(file_path: str, min_severity: str = "info") -> AnalysisResult:
                 )
 
     # ── ERROR: VB6_MISSING_ERROR_HANDLER ──────────────────────────────────────
+    # Class_Initialize não exige tratamento de erro — tipicamente só atribui
+    # valores iniciais a variáveis privadas, sem operações que possam falhar.
+    # Class_Terminate usa 'On Error Resume Next' (padrão para liberar objetos),
+    # não 'On Error GoTo', então também é isento desta regra.
+    _METHODS_SEM_ERROR_HANDLER = {"class_initialize", "class_terminate"}
+
     for method_name, start, end in methods:
+        if method_name.lower() in _METHODS_SEM_ERROR_HANDLER:
+            continue
         method_lines = lines[start - 1 : end]
         method_content = "".join(method_lines)
         has_on_error_goto = bool(re.search(
@@ -409,9 +417,22 @@ def analyze_file(file_path: str, min_severity: str = "info") -> AnalysisResult:
             )
 
     # ── ERROR: VB6_ON_ERROR_RESUME_NEXT_UNSAFE ────────────────────────────────
+    # Class_Terminate pode usar 'On Error Resume Next' sem verificar Err.Number —
+    # é padrão aceitável para silenciar erros ao liberar objetos (Set obj = Nothing).
+    _METHODS_RESUME_NEXT_OK = {"class_terminate"}
+
+    # Mapa linha → nome do método para determinar contexto durante iteração
+    _line_to_method: dict[int, str] = {}
+    for _mn, _ms, _me in methods:
+        for _ln in range(_ms, _me + 1):
+            _line_to_method[_ln] = _mn
+
     resume_next_pattern = re.compile(r'On\s+Error\s+Resume\s+Next', re.IGNORECASE)
     for i, line in enumerate(lines, 1):
         if resume_next_pattern.search(line) and not _is_vb6_comment(line, 0):
+            # Ignorar se estiver dentro de Class_Terminate
+            if _line_to_method.get(i, "").lower() in _METHODS_RESUME_NEXT_OK:
+                continue
             # Verificar se a próxima linha não-em-branco contém 'If Err.Number'
             next_code_line = ""
             for j in range(i, min(i + 5, len(lines))):
@@ -433,24 +454,102 @@ def analyze_file(file_path: str, min_severity: str = "info") -> AnalysisResult:
                     )
 
     # ── ERROR: VB6_INFINITE_LOOP ───────────────────────────────────────────────
-    infinite_loop_pattern = re.compile(
-        r'(?:Do\s+While\s+True\b|^\s*Do\s*$)',
-        re.IGNORECASE | re.MULTILINE,
-    )
-    for match in infinite_loop_pattern.finditer(content):
-        line_num = _line_of(match.start())
-        line_content = lines[line_num - 1] if line_num <= len(lines) else ""
-        col = match.start() - content.rfind("\n", 0, match.start()) - 1
-        if not _is_vb6_comment(line_content, col):
-            if not already_reported("VB6_INFINITE_LOOP", line_num):
+    # Detecta loops potencialmente infinitos. Regras:
+    # • 'Do While True' / 'Do Until False' → sempre infinito.
+    # • 'Do While cond' / 'Do Until cond'  → NÃO infinito (condição no Do).
+    # • Bare 'Do' → infinito APENAS SE o Loop correspondente não tiver
+    #   condição (While/Until) E não houver 'Exit Do' no mesmo bloco.
+    for i, line in enumerate(lines, 1):
+        stripped = line.strip()
+        if stripped.startswith("'") or not stripped:
+            continue
+
+        # Remover comentário inline para análise
+        code_part = stripped
+        in_str = False
+        for _ci, _ch in enumerate(stripped):
+            if _ch == '"':
+                in_str = not in_str
+            elif _ch == "'" and not in_str:
+                code_part = stripped[:_ci].rstrip()
+                break
+
+        if not code_part:
+            continue
+
+        # 'Do While True' / 'Do Until False' → sempre infinito
+        if re.match(r'^Do\s+(While\s+True|Until\s+False)\b', code_part, re.IGNORECASE):
+            if not already_reported("VB6_INFINITE_LOOP", i):
                 add_issue(
-                    line=line_num,
+                    line=i,
                     severity="error",
                     category="Loop Infinito",
                     rule_id="VB6_INFINITE_LOOP",
                     message=(
-                        "Possível loop infinito detectado. "
-                        "Verificar se há 'Exit Do' acessível dentro do loop."
+                        "Loop infinito detectado (Do While True / Do Until False). "
+                        "Adicionar condição de saída ou usar 'Exit Do'."
+                    ),
+                )
+            continue
+
+        # 'Do While cond' / 'Do Until cond' (condição real) → NÃO é infinito
+        if re.match(r'^Do\s+(While|Until)\b', code_part, re.IGNORECASE):
+            continue
+
+        # Bare 'Do' → verificar se Loop tem condição OU se há Exit Do no bloco
+        if not re.match(r'^Do\s*$', code_part, re.IGNORECASE):
+            continue
+
+        # Look-ahead: encontrar o Loop correspondente e checar condição/Exit Do
+        nesting = 1
+        has_exit_do = False
+        has_loop_condition = False
+
+        for j in range(i, min(i + 500, len(lines))):
+            if j >= len(lines):
+                break
+            inner = lines[j].strip()
+
+            # Remover comentário inline
+            in_s = False
+            for _ci2, _ch2 in enumerate(inner):
+                if _ch2 == '"':
+                    in_s = not in_s
+                elif _ch2 == "'" and not in_s:
+                    inner = inner[:_ci2].rstrip()
+                    break
+
+            if not inner or j == i:
+                continue
+
+            if re.match(r'^Do\b', inner, re.IGNORECASE):
+                nesting += 1
+            elif re.match(r'^For\s+\w', inner, re.IGNORECASE):
+                nesting += 1
+            elif re.match(r'^While\b', inner, re.IGNORECASE):
+                nesting += 1
+            elif re.match(r'^Exit\s+Do\b', inner, re.IGNORECASE) and nesting == 1:
+                has_exit_do = True
+            elif re.match(r'^(?:Next|Wend)\b', inner, re.IGNORECASE) and nesting > 1:
+                nesting -= 1
+            elif re.match(r'^Loop\b', inner, re.IGNORECASE):
+                nesting -= 1
+                if nesting == 0:
+                    has_loop_condition = bool(
+                        re.match(r'^Loop\s+(While|Until)\b', inner, re.IGNORECASE)
+                    )
+                    break
+
+        if not has_exit_do and not has_loop_condition:
+            if not already_reported("VB6_INFINITE_LOOP", i):
+                add_issue(
+                    line=i,
+                    severity="error",
+                    category="Loop Infinito",
+                    rule_id="VB6_INFINITE_LOOP",
+                    message=(
+                        "Possível loop infinito: Do...Loop sem condição (While/Until) "
+                        "e sem 'Exit Do' detectado no bloco."
                     ),
                 )
 
@@ -1191,9 +1290,20 @@ def _get_changed_lines(base_path: str, review_path: str, context: int = 0) -> se
     import difflib
 
     def _read(path: str) -> list[str]:
+        # VB6 usa tipicamente Windows-1252; tentar encodings em ordem de preferência.
+        for enc in ("utf-8-sig", "utf-8", "cp1252"):
+            try:
+                with open(path, encoding=enc, errors="strict") as f:
+                    raw = f.readlines()
+                # Normalizar terminadores e espaços finais para evitar falsos diff
+                return [ln.rstrip("\r\n").rstrip() + "\n" for ln in raw]
+            except (UnicodeDecodeError, OSError):
+                continue
+        # Fallback: latin-1 aceita qualquer byte
         try:
-            with open(path, encoding="utf-8", errors="replace") as f:
-                return f.readlines()
+            with open(path, encoding="latin-1") as f:
+                raw = f.readlines()
+            return [ln.rstrip("\r\n").rstrip() + "\n" for ln in raw]
         except OSError:
             return []
 
@@ -1215,29 +1325,45 @@ def _get_changed_lines(base_path: str, review_path: str, context: int = 0) -> se
     return changed
 
 
-def _filter_to_changed(result: AnalysisResult, changed_lines: set[int]) -> AnalysisResult:
+def _filter_to_changed(
+    result: AnalysisResult,
+    changed_lines: set[int],
+    file_path: str | None = None,
+) -> AnalysisResult:
     """
-    Retorna um novo AnalysisResult com apenas os issues cujas linhas estão
-    em changed_lines. Recalcula o score com base nos issues filtrados.
+    Retorna um novo AnalysisResult com apenas os issues relevantes ao diff:
+    • Issues em linhas efetivamente alteradas.
+    • Issues no início de métodos que contêm qualquer linha alterada (contexto de método):
+      p. ex. VB6_MISSING_ERROR_HANDLER é reportado na linha de declaração do método,
+      mas o problema afeta todo o método — deve aparecer se qualquer linha do método mudou.
+    • Issues de nível de arquivo (linha <= 1): Option Explicit, etc.
+
+    Recalcula o score com _calculate_score (uma penalidade por rule_id, consistente
+    com o comportamento de análise completa).
     """
-    filtered = [i for i in result.issues if i.line in changed_lines]
+    # Identificar inícios de métodos que contêm linhas alteradas
+    affected_method_starts: set[int] = set()
+    if file_path and os.path.exists(file_path):
+        try:
+            with open(file_path, encoding="utf-8", errors="replace") as f:
+                file_lines = f.readlines()
+            for _name, start, end in _extract_methods(file_lines):
+                if any(ln in changed_lines for ln in range(start, end + 1)):
+                    affected_method_starts.add(start)
+        except OSError:
+            pass
 
-    # Recalcular score somando penalidades apenas dos issues filtrados
-    total_penalty = 0
-    from collections import defaultdict
-    penalty_count: dict[str, int] = defaultdict(int)
-    for issue in filtered:
-        p = RULE_PENALTIES.get(issue.rule_id, 0)
-        if p > 0:
-            total_penalty += p
-            penalty_count[issue.rule_id] += 1
+    def is_relevant(issue: Issue) -> bool:
+        if issue.line <= 1:
+            return True
+        if issue.line in changed_lines:
+            return True
+        if issue.line in affected_method_starts:
+            return True
+        return False
 
-    score_value = max(0, 100 - total_penalty)
-    penalties = [
-        ScorePenalty(rule_id=rid, penalty=RULE_PENALTIES.get(rid, 0), count=cnt)
-        for rid, cnt in penalty_count.items()
-    ]
-    new_score = Score(value=score_value, label=_score_label(score_value), penalties=penalties)
+    filtered = [i for i in result.issues if is_relevant(i)]
+    new_score = _calculate_score(filtered)
     return AnalysisResult(issues=filtered, score=new_score)
 
 
@@ -1342,7 +1468,7 @@ def compare_directories(
             base_path = base_index[_rel]
             changed_lines = _get_changed_lines(base_path, review_path)
             total_before = len(result.issues)
-            result = _filter_to_changed(result, changed_lines)
+            result = _filter_to_changed(result, changed_lines, review_path)
             _LOG.debug(
                 "[%d/%d] diff-only: %d linhas alteradas | %d/%d issue(s) mantidos",
                 idx, total, len(changed_lines), len(result.issues), total_before,
@@ -1421,7 +1547,7 @@ def compare_files(
     if diff_only and os.path.exists(base_file):
         changed_lines = _get_changed_lines(base_file, review_file)
         total_before = len(result.issues)
-        result = _filter_to_changed(result, changed_lines)
+        result = _filter_to_changed(result, changed_lines, review_file)
         _LOG.debug(
             "diff-only: %d linhas alteradas | %d/%d issue(s) mantidos",
             len(changed_lines), len(result.issues), total_before,
@@ -1447,13 +1573,13 @@ def _write_or_print(content: str, output_path: str | None) -> None:
 
 
 def _find_guardian_dir() -> Path:
-    """Localiza ou cria o diretório .guardian no projeto."""
+    """Localiza ou cria o diretório .codeguardian no projeto."""
     cwd = Path.cwd()
     for parent in [cwd] + list(cwd.parents):
-        candidate = parent / ".guardian"
+        candidate = parent / ".codeguardian"
         if candidate.is_dir():
             return candidate
-    guardian = cwd / ".guardian"
+    guardian = cwd / ".codeguardian"
     guardian.mkdir(exist_ok=True)
     return guardian
 
@@ -1491,7 +1617,7 @@ def main() -> None:
             output_path = args[idx + 1]
 
     def _auto_save_html(results, title, change_types=None):
-        """Salva HTML em .guardian/ automaticamente quando não há --output explícito."""
+        """Salva HTML em .codeguardian/ automaticamente quando não há --output explícito."""
         if output_format == "json" or output_path is not None:
             return
         ts = datetime.now().strftime("%Y-%m-%d-%H%M")

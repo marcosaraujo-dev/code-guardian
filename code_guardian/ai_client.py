@@ -294,6 +294,28 @@ class AIClient:
         config = _load_config()
         ai_config = config.get("ai", DEFAULT_CONFIG["ai"])
 
+        # Overrides via variáveis de ambiente injetadas pelo VS extension.
+        # Permitem configurar provider/modelo em Tools > Options > Code Guardian
+        # sem editar config.json manualmente.
+        primary_env  = os.environ.get("GUARDIAN_AI_PRIMARY",  "").strip()
+        fallback_env = os.environ.get("GUARDIAN_AI_FALLBACK", "").strip()
+        ollama_url   = os.environ.get("GUARDIAN_OLLAMA_URL",  "").strip()
+        ollama_model = os.environ.get("GUARDIAN_OLLAMA_MODEL","").strip()
+
+        if primary_env or fallback_env or ollama_url or ollama_model:
+            ai_config = dict(ai_config)  # cópia rasa para não mutar o dict original
+            if primary_env:
+                ai_config["primary"] = primary_env
+            if fallback_env:
+                ai_config["fallback"] = fallback_env
+            if ollama_url or ollama_model:
+                ollama_cfg = dict(ai_config.get("ollama", DEFAULT_CONFIG["ai"]["ollama"]))
+                if ollama_url:
+                    ollama_cfg["base_url"] = ollama_url
+                if ollama_model:
+                    ollama_cfg["model"] = ollama_model
+                ai_config["ollama"] = ollama_cfg
+
         self.primary_name = ai_config.get("primary", "gemini")
         self.fallback_name = ai_config.get("fallback", "ollama")
 

@@ -45,7 +45,7 @@ def main() -> None:
     if not root:
         sys.exit(0)
 
-    summary_file = Path(root) / ".guardian" / "last-commit-summary.txt"
+    summary_file = Path(root) / ".codeguardian" / "last-commit-summary.txt"
 
     if not summary_file.exists():
         sys.exit(0)

@@ -1,12 +1,12 @@
 # -*- mode: python ; coding: utf-8 -*-
 from PyInstaller.utils.hooks import collect_data_files
 
-datas = [('C:\\Users\\Marcos\\Repos\\code_review\\.claude\\scripts\\code_guardian\\runner.py', 'scripts'), ('C:\\Users\\Marcos\\Repos\\code_review\\.claude\\scripts\\code_guardian\\rule_engine.py', 'scripts'), ('C:\\Users\\Marcos\\Repos\\code_review\\.claude\\scripts\\code_guardian\\vb6_rule_engine.py', 'scripts'), ('C:\\Users\\Marcos\\Repos\\code_review\\.claude\\scripts\\code_guardian\\metrics.py', 'scripts'), ('C:\\Users\\Marcos\\Repos\\code_review\\.claude\\scripts\\code_guardian\\diff_parser.py', 'scripts'), ('C:\\Users\\Marcos\\Repos\\code_review\\.claude\\scripts\\code_guardian\\ai_client.py', 'scripts'), ('C:\\Users\\Marcos\\Repos\\code_review\\.claude\\scripts\\code_guardian\\spelling_checker.py', 'scripts'), ('C:\\Users\\Marcos\\Repos\\code_review\\.claude\\scripts\\code_guardian\\config.json', 'scripts'), ('C:\\Users\\Marcos\\Repos\\code_review\\.claude\\scripts\\code_guardian\\assets', 'assets')]
+datas = [('C:\\Users\\Marcos\\Repos\\code_review\\code_guardian\\runner.py', 'scripts'), ('C:\\Users\\Marcos\\Repos\\code_review\\code_guardian\\rule_engine.py', 'scripts'), ('C:\\Users\\Marcos\\Repos\\code_review\\code_guardian\\vb6_rule_engine.py', 'scripts'), ('C:\\Users\\Marcos\\Repos\\code_review\\code_guardian\\metrics.py', 'scripts'), ('C:\\Users\\Marcos\\Repos\\code_review\\code_guardian\\diff_parser.py', 'scripts'), ('C:\\Users\\Marcos\\Repos\\code_review\\code_guardian\\ai_client.py', 'scripts'), ('C:\\Users\\Marcos\\Repos\\code_review\\code_guardian\\spelling_checker.py', 'scripts'), ('C:\\Users\\Marcos\\Repos\\code_review\\code_guardian\\config.json', 'scripts'), ('C:\\Users\\Marcos\\Repos\\code_review\\code_guardian\\assets', 'assets')]
 datas += collect_data_files('customtkinter')
 
 
 a = Analysis(
-    ['C:\\Users\\Marcos\\Repos\\code_review\\.claude\\scripts\\code_guardian\\code_guardian_ui.py'],
+    ['C:\\Users\\Marcos\\Repos\\code_review\\code_guardian\\code_guardian_ui.py'],
     pathex=[],
     binaries=[],
     datas=datas,
@@ -39,5 +39,5 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon=['C:\\Users\\Marcos\\Repos\\code_review\\.claude\\scripts\\code_guardian\\assets\\icon.ico'],
+    icon=['C:\\Users\\Marcos\\Repos\\code_review\\code_guardian\\assets\\icon.ico'],
 )

@@ -78,10 +78,10 @@ def _should_include(file_path: str) -> bool:
 def get_changed_files(mode: str = "branch", base: str = "origin/main") -> list[str]:
     """Retorna lista de arquivos alterados filtrados."""
     if mode == "staged":
-        output = _run_git(["git", "diff", "--cached", "--name-only"])
+        output = _run_git(["git", "diff", "--cached", "--name-only", "--diff-filter=d"])
     else:
         _run_git(["git", "fetch", "origin", "main"])
-        output = _run_git(["git", "diff", f"{base}...HEAD", "--name-only"])
+        output = _run_git(["git", "diff", f"{base}...HEAD", "--name-only", "--diff-filter=d"])
 
     files = [f.strip() for f in output.splitlines() if f.strip()]
     return [f for f in files if _should_include(f)]

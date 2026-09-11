@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Code Guardian — Ajuda</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0 }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: #1E1E1E; color: #D4D4D4; padding: 32px; line-height: 1.6 }
+    .container { max-width: 860px; margin: 0 auto }
+    h1 { font-size: 22px; font-weight: 700; color: #4FC3F7; margin-bottom: 6px }
+    .subtitle { font-size: 13px; color: #6C757D; margin-bottom: 32px }
+    h2 { font-size: 15px; font-weight: 600; color: #CE9178; margin: 28px 0 10px; border-bottom: 1px solid #2D2D2D; padding-bottom: 6px }
+    h3 { font-size: 13px; font-weight: 600; color: #9CDCFE; margin: 16px 0 6px }
+    p, li { font-size: 13px; color: #C8C8C8; margin-bottom: 6px }
+    ul, ol { padding-left: 20px; margin-bottom: 10px }
+    code { font-family: Consolas, monospace; background: #2D2D2D; padding: 2px 6px; border-radius: 4px; font-size: 12px; color: #4EC9B0 }
+    .card { background: #252526; border: 1px solid #3C3C3C; border-radius: 8px; padding: 16px; margin-bottom: 16px }
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; margin-right: 6px }
+    .badge-c    { background: #1565C0; color: #fff }
+    .badge-vb6  { background: #6A1B9A; color: #fff }
+    .badge-red  { background: #B71C1C; color: #fff }
+    .badge-org  { background: #E65100; color: #fff }
+    .badge-yel  { background: #F57F17; color: #222 }
+    .badge-grn  { background: #1B5E20; color: #fff }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 16px }
+    th { background: #2D2D2D; color: #9CDCFE; padding: 8px 12px; text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: .04em }
+    td { padding: 8px 12px; border-bottom: 1px solid #2D2D2D; color: #C8C8C8; vertical-align: top }
+    tr:hover td { background: #2A2A2A }
+    .tip { background: #1C3A1C; border-left: 3px solid #4EC9B0; padding: 10px 14px; border-radius: 0 6px 6px 0; margin: 10px 0; font-size: 13px }
+    .warn { background: #3A2A00; border-left: 3px solid #CE9178; padding: 10px 14px; border-radius: 0 6px 6px 0; margin: 10px 0; font-size: 13px }
+    a { color: #4FC3F7; text-decoration: none }
+    a:hover { text-decoration: underline }
+    .shortcut { display: inline-block; background: #2D2D2D; border: 1px solid #555; padding: 1px 6px; border-radius: 3px; font-size: 11px; font-family: Consolas, monospace }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <h1>🛡️ Code Guardian — Ajuda</h1>
+  <p class="subtitle">Ferramenta de code review automatizado para C# e VB6</p>
+
+  <!-- MODOS DE ANÁLISE VB6 -->
+  <h2>Modos de Análise — VB6</h2>
+
+  <div class="card">
+    <h3>Arquivo único</h3>
+    <p>Analisa um único arquivo <code>.bas</code>, <code>.cls</code>, <code>.frm</code> ou <code>.ctl</code>. Use para verificar rapidamente um arquivo específico antes de entregar.</p>
+  </div>
+
+  <div class="card">
+    <h3>Scan de diretório</h3>
+    <p>Varre todos os arquivos VB6 de uma pasta recursivamente. Exibe progresso arquivo a arquivo com tamanho (KB) e tempo de análise. Arquivos que demoram mais de 10s exibem heartbeat <code>⏳ ainda processando...</code> no terminal.</p>
+    <div class="warn">⚠️ Pastas grandes (60+ arquivos) podem levar vários minutos. Use <strong>Comparação de pastas</strong> se só quiser revisar o que mudou.</div>
+  </div>
+
+  <div class="card">
+    <h3>Comparação de pastas</h3>
+    <p>Compara duas pastas VB6 e analisa <strong>apenas os arquivos modificados ou adicionados</strong> na pasta de revisão. Usa MD5 para detectar diferenças, então arquivos idênticos são ignorados automaticamente.</p>
+    <ul>
+      <li><strong>Pasta base (original):</strong> código atual / branch de destino</li>
+      <li><strong>Pasta revisão (modificada):</strong> código com as alterações (PDP, branch de revisão)</li>
+    </ul>
+    <div class="tip">✅ Marque <strong>"Apenas linhas alteradas (diff-only)"</strong> para ver somente issues nas linhas que foram realmente modificadas — reduz drasticamente o ruído de código legado.</div>
+  </div>
+
+  <div class="card">
+    <h3>Comparação de arquivos</h3>
+    <p>Compara dois arquivos VB6 individuais (original vs modificado). Ideal para revisar um único form ou módulo de uma entrega.</p>
+    <ul>
+      <li><strong>Arquivo original (base):</strong> versão atual do arquivo</li>
+      <li><strong>Arquivo modificado (revisão):</strong> versão com as alterações</li>
+    </ul>
+    <div class="tip">✅ Também suporta <strong>"Apenas linhas alteradas"</strong> para foco total no código novo.</div>
+  </div>
+
+  <!-- OPÇÃO DIFF-ONLY -->
+  <h2>Opção: Apenas linhas alteradas (diff-only)</h2>
+  <p>Disponível nos modos de comparação. Usa <code>difflib</code> (nativo Python) para calcular quais linhas foram <strong>adicionadas ou substituídas</strong> no arquivo de revisão. Apenas issues que caem nessas linhas são reportados.</p>
+  <table>
+    <thead><tr><th>Arquivo</th><th>Sem diff-only</th><th>Com diff-only</th></tr></thead>
+    <tbody>
+      <tr><td>GPS022001.bas</td><td>63 issues</td><td>0 issues</td></tr>
+      <tr><td>GPS022001.frm</td><td>344 issues</td><td>2 issues</td></tr>
+      <tr><td>GPS022009.frm</td><td>94 issues</td><td>5 issues</td></tr>
+    </tbody>
+  </table>
+
+  <!-- MODOS DE ANÁLISE C# -->
+  <h2>Modos de Análise — C#</h2>
+  <div class="card">
+    <table>
+      <thead><tr><th>Modo</th><th>Descrição</th></tr></thead>
+      <tbody>
+        <tr><td><code>Diff vs branch</code></td><td>Analisa arquivos alterados em relação a um branch (ex: <code>origin/main</code>). Ideal para pré-review de PR.</td></tr>
+        <tr><td><code>Staged</code></td><td>Analisa apenas arquivos em stage (<code>git add</code>). Use antes do commit.</td></tr>
+        <tr><td><code>Arquivo único</code></td><td>Analisa um <code>.cs</code> específico.</td></tr>
+        <tr><td><code>Scan de diretório</code></td><td>Varre todos os <code>.cs</code> de uma pasta.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- SEVERIDADES -->
+  <h2>Severidades</h2>
+  <table>
+    <thead><tr><th>Ícone</th><th>Nível</th><th>Significado</th><th>Bloqueia aprovação?</th></tr></thead>
+    <tbody>
+      <tr><td>🔴</td><td><span class="badge badge-red">CRITICAL</span></td><td>SQL Injection, Option Explicit ausente, declarações proibidas</td><td>Sim</td></tr>
+      <tr><td>🟠</td><td><span class="badge badge-org">ERROR</span></td><td>Error handler ausente, On Error Resume Next inseguro, loop infinito</td><td>Sim</td></tr>
+      <tr><td>🟡</td><td><span class="badge badge-yel">WARNING</span></td><td>Variant overuse, magic numbers, string concat em loop, objeto não liberado</td><td>Não</td></tr>
+      <tr><td>🔵</td><td><span class="badge badge-grn">INFO</span></td><td>TODOs, observações de nomenclatura</td><td>Não</td></tr>
+    </tbody>
+  </table>
+
+  <!-- SCORE -->
+  <h2>Score de qualidade (0–100)</h2>
+  <table>
+    <thead><tr><th>Score</th><th>Label</th><th>Ação recomendada</th></tr></thead>
+    <tbody>
+      <tr><td>90–100</td><td>Excellent</td><td>Aprovado</td></tr>
+      <tr><td>75–89</td><td>Good — minor improvements</td><td>Aprovado com ressalvas</td></tr>
+      <tr><td>60–74</td><td>Moderate technical debt</td><td>Revisar warnings críticos antes de aprovar</td></tr>
+      <tr><td>40–59</td><td>High technical debt</td><td>Refatoração recomendada</td></tr>
+      <tr><td>0–39</td><td>Critical — do not approve</td><td>Não aprovar</td></tr>
+    </tbody>
+  </table>
+
+  <!-- BOTÕES DA UI -->
+  <h2>Botões da interface</h2>
+  <table>
+    <thead><tr><th>Botão</th><th>Função</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Executar</strong></td><td>Inicia a análise com as configurações selecionadas.</td></tr>
+      <tr><td><strong>Cancelar</strong></td><td>Interrompe a análise em andamento imediatamente.</td></tr>
+      <tr><td><strong>Abrir Relatório</strong></td><td>Abre o último relatório HTML gerado no navegador padrão.</td></tr>
+      <tr><td><strong>Limpar Terminal</strong></td><td>Limpa o painel de saída.</td></tr>
+      <tr><td><strong>Configurações</strong></td><td>Configura provedores de IA (Gemini, Claude, OpenAI, Ollama) e API keys.</td></tr>
+      <tr><td><strong>?</strong></td><td>Abre esta página de ajuda.</td></tr>
+    </tbody>
+  </table>
+
+  <!-- LOGS -->
+  <h2>Logs e diagnóstico</h2>
+  <p>Os logs de execução ficam em <code>.codeguardian/logs/vb6-YYYY-MM-DD.log</code> relativo ao diretório do projeto. Cada execução registra:</p>
+  <ul>
+    <li>Comando executado com todos os argumentos</li>
+    <li>Cada arquivo analisado com score, número de issues e tempo</li>
+    <li>Heartbeat <code>WARNING</code> se um arquivo demorar mais de 10s</li>
+    <li>Resultado final com tempo total</li>
+  </ul>
+  <div class="tip">Se a análise parecer travada, verifique o log — o último registro mostra qual arquivo estava sendo processado.</div>
+
+  <!-- CLI -->
+  <h2>Uso via linha de comando (CLI)</h2>
+  <div class="card">
+    <h3>VB6 — vb6_rule_engine.py</h3>
+    <pre style="font-family:Consolas,monospace;font-size:12px;color:#9CDCFE;white-space:pre-wrap">
+# Arquivo único
+python vb6_rule_engine.py arquivo.frm
+
+# Scan de pasta
+python vb6_rule_engine.py --scan --dir C:/projeto
+
+# Comparação de pastas
+python vb6_rule_engine.py --compare --base C:/original --review C:/revisao
+
+# Comparação de pastas — só linhas alteradas
+python vb6_rule_engine.py --compare --base C:/original --review C:/revisao --diff-only
+
+# Comparação de dois arquivos
+python vb6_rule_engine.py --compare-files --base original.frm --review modificado.frm
+
+# Flags comuns
+--format html          # saída HTML
+--format json          # saída JSON (CI/CD)
+--severity error       # só critical e error
+--output relatorio.html
+    </pre>
+  </div>
+
+  <p style="margin-top:32px;font-size:11px;color:#555;text-align:center">Code Guardian — Documentação local &nbsp;|&nbsp; <a href="#">Voltar ao topo</a></p>
+
+</div>
+</body>
+</html>

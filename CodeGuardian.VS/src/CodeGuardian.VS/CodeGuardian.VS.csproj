@@ -11,7 +11,12 @@
     <IncludeDebugSymbolsInLocalVSIXDeployment>true</IncludeDebugSymbolsInLocalVSIXDeployment>
     <CopyBuildOutputToOutputDirectory>true</CopyBuildOutputToOutputDirectory>
     <CreateVsixContainer>true</CreateVsixContainer>
-    <DeployExtension>true</DeployExtension>
+    <!-- Debug: deploy na instancia experimental. Release: gera VSIX em release/ -->
+    <DeployExtension Condition="'$(Configuration)' == 'Debug'">true</DeployExtension>
+    <DeployExtension Condition="'$(Configuration)' == 'Release'">false</DeployExtension>
+    <!-- VSIX gerado direto na pasta release/ ao compilar em Release -->
+    <TargetVsixContainerName>CodeGuardian.VS.vsix</TargetVsixContainerName>
+    <TargetVsixContainer>$(MSBuildProjectDirectory)\..\..\release\$(TargetVsixContainerName)</TargetVsixContainer>
     <DeployVSTemplates>false</DeployVSTemplates>
     <UseWPF>true</UseWPF>
     <Nullable>enable</Nullable>
@@ -24,9 +29,6 @@
     <ResourceManifest>$(MSBuildProjectDirectory)\obj\$(Configuration)\$(TargetFramework)\resources.json</ResourceManifest>
     <!-- Define o assembly que o CreatePkgDef vai processar para gerar o .pkgdef -->
     <CreatePkgDefAssemblyToProcess>$(MSBuildProjectDirectory)\bin\$(Configuration)\$(TargetFramework)\$(AssemblyName).dll</CreatePkgDefAssemblyToProcess>
-    <!-- Nome e destino do arquivo .vsix gerado -->
-    <TargetVsixContainerName>CodeGuardian.VS</TargetVsixContainerName>
-    <VsixOutputPath>$(MSBuildProjectDirectory)\..\..\release\</VsixOutputPath>
   </PropertyGroup>
 
   <ItemGroup>
@@ -60,8 +62,76 @@
       <IncludeInVSIX>true</IncludeInVSIX>
       <VSIXSubPath>Resources</VSIXSubPath>
     </Content>
+    <!-- Newtonsoft.Json deve estar junto ao DLL principal (o vsixinstaller.exe
+         nao tem esse assembly no seu probing path, diferente do devenv.exe) -->
+    <Content Include="$(NuGetPackageRoot)newtonsoft.json\13.0.3\lib\net45\Newtonsoft.Json.dll"
+             Condition="Exists('$(NuGetPackageRoot)newtonsoft.json\13.0.3\lib\net45\Newtonsoft.Json.dll')">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <IncludeInVSIX>true</IncludeInVSIX>
+    </Content>
   </ItemGroup>
 
-  <!-- Import explícito dos targets VSSDK (CreateVsixContainer, GeneratePkgDef, DeployVsixExtension) -->
-  <Import Project="$(VsSDKInstall)\Microsoft.VsSDK.targets" Condition="'$(VsSDKInstall)' != '' and Exists('$(VsSDKInstall)\Microsoft.VsSDK.targets')" />
+  <ItemGroup>
+    <!-- Scripts Python bundlados — copiados para %LOCALAPPDATA%\CodeGuardian\scripts na instalacao dos hooks -->
+    <Content Include="..\..\..\code_guardian\runner.py">
+      <Link>scripts\runner.py</Link>
+      <IncludeInVSIX>true</IncludeInVSIX>
+      <VSIXSubPath>scripts</VSIXSubPath>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\..\..\code_guardian\rule_engine.py">
+      <Link>scripts\rule_engine.py</Link>
+      <IncludeInVSIX>true</IncludeInVSIX>
+      <VSIXSubPath>scripts</VSIXSubPath>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\..\..\code_guardian\metrics.py">
+      <Link>scripts\metrics.py</Link>
+      <IncludeInVSIX>true</IncludeInVSIX>
+      <VSIXSubPath>scripts</VSIXSubPath>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\..\..\code_guardian\diff_parser.py">
+      <Link>scripts\diff_parser.py</Link>
+      <IncludeInVSIX>true</IncludeInVSIX>
+      <VSIXSubPath>scripts</VSIXSubPath>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\..\..\code_guardian\ai_client.py">
+      <Link>scripts\ai_client.py</Link>
+      <IncludeInVSIX>true</IncludeInVSIX>
+      <VSIXSubPath>scripts</VSIXSubPath>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\..\..\code_guardian\spelling_checker.py">
+      <Link>scripts\spelling_checker.py</Link>
+      <IncludeInVSIX>true</IncludeInVSIX>
+      <VSIXSubPath>scripts</VSIXSubPath>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\..\..\code_guardian\_append_guardian_trailer.py">
+      <Link>scripts\_append_guardian_trailer.py</Link>
+      <IncludeInVSIX>true</IncludeInVSIX>
+      <VSIXSubPath>scripts</VSIXSubPath>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\..\..\code_guardian\__init__.py">
+      <Link>scripts\__init__.py</Link>
+      <IncludeInVSIX>true</IncludeInVSIX>
+      <VSIXSubPath>scripts</VSIXSubPath>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <!-- Importa os targets do VSSDK que definem CreateVsixContainer, GeneratePkgDef, etc.
+       Necessário em projetos SDK-style pois o NuGet package não faz este import automaticamente. -->
+  <Import Project="$(VSToolsPath)\VSSDK\Microsoft.VsSDK.targets"
+          Condition="'$(VSToolsPath)' != '' AND Exists('$(VSToolsPath)\VSSDK\Microsoft.VsSDK.targets')" />
+
+  <!-- Garante que a pasta release/ existe e que CreateVsixContainer roda após o Build (só no Release) -->
+  <Target Name="PackVsix" AfterTargets="Build" Condition="'$(Configuration)' == 'Release'">
+    <MakeDir Directories="$(MSBuildProjectDirectory)\..\..\release" />
+    <CallTarget Targets="CreateVsixContainer" />
+  </Target>
+
 </Project>

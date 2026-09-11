@@ -1,0 +1,32 @@
+# Build outputs
+bin/
+obj/
+release/
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.cache
+*.userosscache
+*.sln.docstates
+
+# VS activity log (gerado pelo devenv)
+ActivityLog.xml
+
+# Pacotes NuGet
+packages/
+*.nupkg
+
+# Arquivos gerados pelo VSSDK
+*.pkgdef
+*.vsct.bak
+
+# Extensão compilada — gerada via build, não versionada
+*.vsix
+
+# Scripts com caminhos específicos da máquina local
+deploy-exp.sh
+
+# Configurações locais do Claude Code
+.claude/settings.local.json

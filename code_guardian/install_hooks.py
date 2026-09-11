@@ -67,7 +67,7 @@ _HOOK_PRE_COMMIT = (
     "fi\n"
     "\n"
     # Diretório e caminhos do relatório HTML e summary file
-    "REPORT_DIR=\"$GIT_ROOT/.guardian\"\n"
+    "REPORT_DIR=\"$GIT_ROOT/.codeguardian\"\n"
     "REPORT_HTML=\"$REPORT_DIR/last-commit-report.html\"\n"
     "SUMMARY_FILE=\"$REPORT_DIR/last-commit-summary.txt\"\n"
     "mkdir -p \"$REPORT_DIR\"\n"
@@ -147,7 +147,7 @@ _HOOK_PRE_PUSH = (
     "fi\n"
     "\n"
     # Diretório e caminho do relatório HTML — sempre gerado para cada push
-    "REPORT_DIR=\"$GIT_ROOT/.guardian\"\n"
+    "REPORT_DIR=\"$GIT_ROOT/.codeguardian\"\n"
     "REPORT_HTML=\"$REPORT_DIR/last-push-report.html\"\n"
     "mkdir -p \"$REPORT_DIR\"\n"
     "\n"

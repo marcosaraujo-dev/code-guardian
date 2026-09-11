@@ -41,16 +41,43 @@ namespace CodeGuardian.VS.Commands
 
         private async Task ExecutarAsync()
         {
-            await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+            try
+            {
+                await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
 
-            var janela = await _package.ShowToolWindowAsync(
-                toolWindowType: typeof(GuardianToolWindow),
-                id: 0,
-                create: true,
-                cancellationToken: _package.DisposalToken);
+                var janela = await _package.ShowToolWindowAsync(
+                    toolWindowType: typeof(GuardianToolWindow),
+                    id: 0,
+                    create: true,
+                    cancellationToken: _package.DisposalToken);
 
-            if (janela?.Frame is IVsWindowFrame frame)
-                Microsoft.VisualStudio.ErrorHandler.ThrowOnFailure(frame.Show());
+                if (janela == null)
+                {
+                    System.Windows.MessageBox.Show(
+                        "ShowToolWindowAsync retornou null.\nVerifique se o ProvideToolWindow está registrado corretamente.",
+                        "Code Guardian — Diagnóstico",
+                        System.Windows.MessageBoxButton.OK,
+                        System.Windows.MessageBoxImage.Warning);
+                    return;
+                }
+
+                if (janela.Frame is IVsWindowFrame frame)
+                    Microsoft.VisualStudio.ErrorHandler.ThrowOnFailure(frame.Show());
+                else
+                    System.Windows.MessageBox.Show(
+                        $"Frame inválido. janela.Frame = {janela.Frame?.GetType().FullName ?? "null"}",
+                        "Code Guardian — Diagnóstico",
+                        System.Windows.MessageBoxButton.OK,
+                        System.Windows.MessageBoxImage.Warning);
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show(
+                    $"Erro ao abrir janela:\n\n{ex.GetType().Name}: {ex.Message}\n\n{ex.StackTrace}",
+                    "Code Guardian — Erro",
+                    System.Windows.MessageBoxButton.OK,
+                    System.Windows.MessageBoxImage.Error);
+            }
         }
     }
 }

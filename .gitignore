@@ -7,7 +7,7 @@ __pycache__/
 *.egg-info/
 
 # Build standalone exe (output do build_exe.py / PyInstaller)
-code_guardian/assets/
+# code_guardian/assets/ NÃO é ignorado — contém icon.ico e help.html embutidos no .exe (fonte, não build output)
 code_guardian/build/
 dist/
 
@@ -53,6 +53,11 @@ erro.png
 *.swp
 Thumbs.db
 .DS_Store
+
+# ─── Extensão VS Code (CodeGuardian.VsCode) ────────────────
+CodeGuardian.VsCode/node_modules/
+CodeGuardian.VsCode/dist/
+CodeGuardian.VsCode/out/
 
 # ─── Secrets ──────────────────────────────────────────────
 # config.json só é ignorado se contiver chaves reais —

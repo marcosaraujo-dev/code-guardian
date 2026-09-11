@@ -1,0 +1,181 @@
+{
+  "name": "cygnusforge-codeguardian",
+  "displayName": "Code Guardian by CygnusForge",
+  "description": "Automated code review for C# — security, quality metrics, AI analysis and risk score.",
+  "version": "1.0.8",
+  "publisher": "MarcosAraujo",
+  "icon": "media/icon.png",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cygnusforge/codeguardian"
+  },
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Linters",
+    "Other"
+  ],
+  "keywords": [
+    "code review",
+    "csharp",
+    "security",
+    "code quality",
+    "static analysis"
+  ],
+  "activationEvents": [
+    "onLanguage:csharp",
+    "workspaceContains:**/*.cs"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "codeguardian.analyzeFile",
+        "title": "Code Guardian: Analisar Arquivo Atual",
+        "icon": "$(search)"
+      },
+      {
+        "command": "codeguardian.analyzeSolution",
+        "title": "Code Guardian: Analisar Projeto Completo",
+        "icon": "$(folder-opened)"
+      },
+      {
+        "command": "codeguardian.analyzeIncremental",
+        "title": "Code Guardian: Analisar Alterações (git diff)",
+        "icon": "$(git-commit)"
+      },
+      {
+        "command": "codeguardian.openPanel",
+        "title": "Code Guardian: Abrir Painel",
+        "icon": "$(shield)"
+      },
+      {
+        "command": "codeguardian.installHooks",
+        "title": "Code Guardian: Instalar Git Hooks",
+        "icon": "$(git-branch)"
+      },
+      {
+        "command": "codeguardian.exportSarif",
+        "title": "Code Guardian: Exportar SARIF",
+        "icon": "$(export)"
+      },
+      {
+        "command": "codeguardian.clearResults",
+        "title": "Code Guardian: Limpar Resultados",
+        "icon": "$(clear-all)"
+      }
+    ],
+    "menus": {
+      "editor/title": [
+        {
+          "command": "codeguardian.analyzeFile",
+          "when": "resourceExtname == .cs",
+          "group": "navigation"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "codeguardian.analyzeFile",
+          "when": "resourceExtname == .cs"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "Code Guardian",
+      "properties": {
+        "codeguardian.pythonExecutable": {
+          "type": "string",
+          "default": "python",
+          "description": "Executável Python (ex: python, python3, /usr/bin/python3)."
+        },
+        "codeguardian.analyzeOnSave": {
+          "type": "boolean",
+          "default": true,
+          "description": "Analisar automaticamente ao salvar arquivos .cs."
+        },
+        "codeguardian.rulesOnly": {
+          "type": "boolean",
+          "default": true,
+          "description": "Usar apenas regras (sem IA). Análise mais rápida."
+        },
+        "codeguardian.minimumSeverity": {
+          "type": "string",
+          "enum": ["info", "warning", "error", "critical"],
+          "default": "warning",
+          "description": "Severidade mínima para exibir issues."
+        },
+        "codeguardian.timeoutSeconds": {
+          "type": "number",
+          "default": 30,
+          "minimum": 5,
+          "maximum": 300,
+          "description": "Timeout máximo da análise em segundos."
+        },
+        "codeguardian.runnerScriptPath": {
+          "type": "string",
+          "default": "",
+          "description": "Caminho absoluto para runner.py. Deixe em branco para auto-descoberta."
+        },
+        "codeguardian.ia.providerPrimary": {
+          "type": "string",
+          "enum": ["gemini", "claude", "openai", "ollama", "none"],
+          "default": "ollama",
+          "description": "Provider de IA principal."
+        },
+        "codeguardian.ia.providerFallback": {
+          "type": "string",
+          "enum": ["gemini", "claude", "openai", "ollama", "none"],
+          "default": "none",
+          "description": "Provider de IA de fallback."
+        },
+        "codeguardian.ia.ollamaUrl": {
+          "type": "string",
+          "default": "http://localhost:11434",
+          "description": "URL do servidor Ollama."
+        },
+        "codeguardian.ia.ollamaModel": {
+          "type": "string",
+          "default": "qwen2.5-coder:32b",
+          "description": "Modelo Ollama a usar."
+        }
+      }
+    },
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "codeguardian",
+          "title": "Code Guardian",
+          "icon": "media/shield.svg"
+        }
+      ]
+    },
+    "views": {
+      "codeguardian": [
+        {
+          "type": "webview",
+          "id": "codeguardian.panel",
+          "name": "Code Guardian"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run package",
+    "compile": "webpack",
+    "watch": "webpack --watch",
+    "package": "webpack --mode production --devtool hidden-source-map",
+    "lint": "eslint src --ext ts"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/vscode": "^1.85.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "eslint": "^8.0.0",
+    "ts-loader": "^9.5.0",
+    "typescript": "^5.3.0",
+    "webpack": "^5.90.0",
+    "webpack-cli": "^5.1.0"
+  }
+}

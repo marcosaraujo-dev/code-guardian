@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; script-src 'nonce-{{NONCE}}';" />
+  <title>Code Guardian</title>
+  <style>
+    :root {
+      --risk-color: #4caf50;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--vscode-font-family);
+      font-size: var(--vscode-font-size);
+      color: var(--vscode-foreground);
+      background: var(--vscode-sideBar-background);
+      padding: 8px;
+    }
+
+    /* --- Header --- */
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+    .header h2 { flex: 1; font-size: 13px; font-weight: 600; }
+    .btn {
+      background: var(--vscode-button-background);
+      color: var(--vscode-button-foreground);
+      border: none;
+      border-radius: 3px;
+      padding: 3px 8px;
+      cursor: pointer;
+      font-size: 11px;
+    }
+    .btn:hover { background: var(--vscode-button-hoverBackground); }
+    .btn-secondary {
+      background: var(--vscode-button-secondaryBackground);
+      color: var(--vscode-button-secondaryForeground);
+    }
+    .btn-secondary:hover { background: var(--vscode-button-secondaryHoverBackground); }
+
+    /* --- Botões de ação --- */
+    .actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4px;
+      margin-bottom: 10px;
+    }
+
+    /* --- Risk Score --- */
+    .risk-card {
+      background: var(--vscode-editorWidget-background);
+      border-radius: 4px;
+      padding: 8px;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .risk-number {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--risk-color);
+      min-width: 48px;
+      text-align: center;
+    }
+    .risk-bar-wrap { flex: 1; }
+    .risk-label { font-size: 10px; color: var(--vscode-descriptionForeground); margin-bottom: 3px; }
+    .risk-bar {
+      height: 6px;
+      background: var(--vscode-progressBar-background);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .risk-fill {
+      height: 100%;
+      background: var(--risk-color);
+      width: 0%;
+      transition: width 0.3s;
+    }
+    .risk-trend { font-size: 10px; color: var(--vscode-descriptionForeground); }
+
+    /* --- Contadores --- */
+    .counters {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 4px;
+      margin-bottom: 10px;
+    }
+    .counter {
+      background: var(--vscode-editorWidget-background);
+      border-radius: 3px;
+      padding: 4px;
+      text-align: center;
+    }
+    .counter-num { font-size: 16px; font-weight: 700; }
+    .counter-label { font-size: 10px; color: var(--vscode-descriptionForeground); }
+    .sev-critical { color: #f44336; }
+    .sev-error    { color: #ff9800; }
+    .sev-warning  { color: #ffeb3b; }
+    .sev-info     { color: #2196f3; }
+
+    /* --- Filtros --- */
+    .filters {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 6px;
+    }
+    .filters select, .filters input {
+      background: var(--vscode-input-background);
+      color: var(--vscode-input-foreground);
+      border: 1px solid var(--vscode-input-border);
+      border-radius: 3px;
+      padding: 2px 4px;
+      font-size: 11px;
+    }
+    .filters select { width: 90px; }
+    .filters input  { flex: 1; }
+
+    /* --- Lista de issues --- */
+    .issue-list { max-height: 340px; overflow-y: auto; }
+    .issue-item {
+      background: var(--vscode-list-inactiveSelectionBackground);
+      border-radius: 3px;
+      padding: 5px 7px;
+      margin-bottom: 3px;
+      cursor: pointer;
+      display: flex;
+      gap: 6px;
+      align-items: flex-start;
+    }
+    .issue-item:hover { background: var(--vscode-list-hoverBackground); }
+    .issue-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      margin-top: 3px;
+      flex-shrink: 0;
+    }
+    .issue-body { flex: 1; min-width: 0; }
+    .issue-rule { font-size: 10px; font-weight: 600; }
+    .issue-msg  { font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .issue-loc  { font-size: 10px; color: var(--vscode-descriptionForeground); }
+    .issue-actions { display: flex; gap: 3px; }
+    .issue-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--vscode-descriptionForeground);
+      font-size: 11px;
+      padding: 0 3px;
+    }
+    .issue-btn:hover { color: var(--vscode-foreground); }
+
+    /* --- Métricas --- */
+    .section-title {
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      color: var(--vscode-descriptionForeground);
+      margin: 10px 0 4px;
+    }
+    .metrics-item {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      padding: 2px 0;
+    }
+    .metric-warn { color: #ff9800; }
+
+    /* --- Status --- */
+    .status {
+      font-size: 10px;
+      color: var(--vscode-descriptionForeground);
+      text-align: center;
+      padding: 8px;
+    }
+    .loading { font-style: italic; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h2>🛡️ Code Guardian</h2>
+    <button class="btn btn-secondary" onclick="sendCommand('clearResults')" title="Limpar">✕</button>
+  </div>
+
+  <div class="actions">
+    <button class="btn" onclick="sendCommand('analyzeFile')">📄 Arquivo</button>
+    <button class="btn" onclick="sendCommand('analyzeSolution')">📁 Solution</button>
+    <button class="btn" onclick="sendCommand('analyzeIncremental')">⚡ Incremental</button>
+    <button class="btn btn-secondary" onclick="sendCommand('exportSarif')">📋 SARIF</button>
+  </div>
+
+  <div id="loading" class="status loading" style="display:none;">Analisando...</div>
+  <div id="empty" class="status">Clique em Arquivo, Solution ou Incremental para iniciar.</div>
+  <div id="content" style="display:none;">
+    <div class="risk-card">
+      <div class="risk-number" id="riskNumber">0</div>
+      <div class="risk-bar-wrap">
+        <div class="risk-label">RISK SCORE</div>
+        <div class="risk-bar"><div class="risk-fill" id="riskFill"></div></div>
+        <div class="risk-trend" id="riskTrend"></div>
+      </div>
+    </div>
+
+    <div class="counters">
+      <div class="counter">
+        <div class="counter-num sev-critical" id="cntCritical">0</div>
+        <div class="counter-label">Critical</div>
+      </div>
+      <div class="counter">
+        <div class="counter-num sev-error" id="cntError">0</div>
+        <div class="counter-label">Error</div>
+      </div>
+      <div class="counter">
+        <div class="counter-num sev-warning" id="cntWarning">0</div>
+        <div class="counter-label">Warning</div>
+      </div>
+      <div class="counter">
+        <div class="counter-num sev-info" id="cntInfo">0</div>
+        <div class="counter-label">Info</div>
+      </div>
+    </div>
+
+    <div class="filters">
+      <select id="filterSev" onchange="aplicarFiltros()">
+        <option value="">Tudo</option>
+        <option value="critical">Critical</option>
+        <option value="error">Error</option>
+        <option value="warning">Warning</option>
+        <option value="info">Info</option>
+      </select>
+      <input type="text" id="filterText" placeholder="Filtrar..." oninput="aplicarFiltros()" />
+    </div>
+
+    <div class="issue-list" id="issueList"></div>
+
+    <div id="metricsSection" style="display:none;">
+      <div class="section-title">Métricas</div>
+      <div id="metricsList"></div>
+    </div>
+  </div>
+
+  <script nonce="{{NONCE}}">
+    const vscode = acquireVsCodeApi();
+    let allIssues = [];
+
+    function sendCommand(cmd) {
+      vscode.postMessage({ command: cmd });
+    }
+
+    window.addEventListener('message', ev => {
+      const msg = ev.data;
+      if (msg.type === 'loading') {
+        showLoading();
+      } else if (msg.type === 'result') {
+        renderResult(msg.data);
+      } else if (msg.type === 'error') {
+        showError(msg.message);
+      } else if (msg.type === 'clear') {
+        showEmpty();
+      }
+    });
+
+    function showLoading() {
+      document.getElementById('loading').style.display = 'block';
+      document.getElementById('empty').style.display = 'none';
+      document.getElementById('content').style.display = 'none';
+    }
+
+    function showEmpty() {
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('empty').style.display = 'block';
+      document.getElementById('empty').textContent = 'Clique em Arquivo, Solution ou Incremental para iniciar.';
+      document.getElementById('content').style.display = 'none';
+    }
+
+    function showError(msg) {
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('empty').style.display = 'block';
+      document.getElementById('empty').textContent = '⚠ ' + msg;
+      document.getElementById('content').style.display = 'none';
+    }
+
+    function renderResult(result) {
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('empty').style.display = 'none';
+      document.getElementById('content').style.display = 'block';
+
+      const score = result.risk_score ?? 0;
+      const color = score <= 10 ? '#4caf50' : score <= 30 ? '#8bc34a' : score <= 60 ? '#ff9800' : '#f44336';
+      document.documentElement.style.setProperty('--risk-color', color);
+      document.getElementById('riskNumber').textContent = score;
+      document.getElementById('riskFill').style.width = score + '%';
+
+      document.getElementById('cntCritical').textContent = result.critical_count ?? 0;
+      document.getElementById('cntError').textContent    = result.error_count ?? 0;
+      document.getElementById('cntWarning').textContent  = result.warning_count ?? 0;
+      document.getElementById('cntInfo').textContent     = result.info_count ?? 0;
+
+      allIssues = result.issues ?? [];
+      aplicarFiltros();
+      renderMetrics(result.metrics ?? []);
+    }
+
+    function aplicarFiltros() {
+      const sevFilter  = document.getElementById('filterSev').value;
+      const textFilter = document.getElementById('filterText').value.toLowerCase();
+      const filtered   = allIssues.filter(i =>
+        (!sevFilter || i.severity === sevFilter) &&
+        (!textFilter || i.message.toLowerCase().includes(textFilter) || i.rule_id.toLowerCase().includes(textFilter))
+      );
+      renderIssues(filtered);
+    }
+
+    function renderIssues(issues) {
+      const colors = { critical: '#f44336', error: '#ff9800', warning: '#ffeb3b', info: '#2196f3' };
+      const list = document.getElementById('issueList');
+      list.innerHTML = issues.map((iss, idx) => `
+        <div class="issue-item" onclick="abrirArquivo('${esc(iss.file)}', ${iss.line})">
+          <div class="issue-dot" style="background:${colors[iss.severity] || '#888'}"></div>
+          <div class="issue-body">
+            <div class="issue-rule">[${esc(iss.rule_id)}]</div>
+            <div class="issue-msg" title="${esc(iss.message)}">${esc(iss.message)}</div>
+            <div class="issue-loc">${esc(iss.file.split(/[\\/]/).pop())} :${iss.line}</div>
+          </div>
+          <div class="issue-actions">
+            <button class="issue-btn" title="Copiar" onclick="copiarIssue(event,${idx})">⧉</button>
+            <button class="issue-btn" title="Suprimir" onclick="suprimirIssue(event,'${esc(iss.file)}',${iss.line},'${esc(iss.rule_id)}')">✕</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderMetrics(metrics) {
+      const section = document.getElementById('metricsSection');
+      if (!metrics.length) { section.style.display = 'none'; return; }
+      section.style.display = 'block';
+      const list = document.getElementById('metricsList');
+      list.innerHTML = metrics.map(m => `
+        <div class="metrics-item">
+          <span>${esc(m.file.split(/[\\/]/).pop())}</span>
+          <span class="${m.largest_method_lines > 30 ? 'metric-warn' : ''}">${m.total_lines}L | método: ${m.largest_method_lines}L | nest: ${m.max_nesting}</span>
+        </div>
+      `).join('');
+    }
+
+    function abrirArquivo(file, line) {
+      vscode.postMessage({ command: 'openFile', file, line });
+    }
+
+    function copiarIssue(ev, idx) {
+      ev.stopPropagation();
+      const iss = allIssues[idx];
+      vscode.postMessage({ command: 'copyIssue', text: `[${iss.severity.toUpperCase()}] ${iss.rule_id}: ${iss.message} (${iss.file}:${iss.line})` });
+    }
+
+    function suprimirIssue(ev, file, line, ruleId) {
+      ev.stopPropagation();
+      vscode.postMessage({ command: 'suppressIssue', file, line, ruleId });
+    }
+
+    function esc(s) {
+      return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+  </script>
+</body>
+</html>

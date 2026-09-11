@@ -2,7 +2,9 @@ using System;
 using System.ComponentModel.Design;
 using System.IO;
 using CodeGuardian.VS.Analysis;
+using CodeGuardian.VS.ToolWindow;
 using Microsoft.VisualStudio.Shell;
+using Microsoft.VisualStudio.Shell.Interop;
 using Task = System.Threading.Tasks.Task;
 
 namespace CodeGuardian.VS.Commands
@@ -64,6 +66,17 @@ namespace CodeGuardian.VS.Commands
 
             if (string.IsNullOrEmpty(solutionDir))
                 return;
+
+            // Garante que a Tool Window esteja aberta antes da análise,
+            // para que o ViewModel já esteja inscrito no evento AnalysisCompleted
+            var janela = await _package.ShowToolWindowAsync(
+                toolWindowType: typeof(GuardianToolWindow),
+                id: 0,
+                create: true,
+                cancellationToken: _package.DisposalToken);
+
+            if (janela?.Frame is IVsWindowFrame frame)
+                Microsoft.VisualStudio.ErrorHandler.ThrowOnFailure(frame.Show());
 
             var dte = Microsoft.VisualStudio.Shell.Package.GetGlobalService(typeof(EnvDTE.DTE)) as EnvDTE.DTE;
             if (dte != null)

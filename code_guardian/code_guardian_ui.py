@@ -369,7 +369,7 @@ class AppState:
 
 # ── Task 8: Helper _find_guardian_dir ────────────────────────────────────────
 def _find_guardian_dir(cwd: Optional[Path] = None) -> Path:
-    """Detecta a pasta .guardian/ via git rev-parse; fallback para cwd."""
+    """Detecta a pasta .codeguardian/ via git rev-parse; fallback para cwd."""
     try:
         result = subprocess.run(
             ["git", "rev-parse", "--show-toplevel"],
@@ -378,12 +378,12 @@ def _find_guardian_dir(cwd: Optional[Path] = None) -> Path:
             timeout=5,
         )
         if result.returncode == 0:
-            guardian = Path(result.stdout.strip()) / ".guardian"
+            guardian = Path(result.stdout.strip()) / ".codeguardian"
             guardian.mkdir(exist_ok=True)
             return guardian
     except Exception:
         pass
-    fallback = (cwd or Path.cwd()) / ".guardian"
+    fallback = (cwd or Path.cwd()) / ".codeguardian"
     fallback.mkdir(exist_ok=True)
     return fallback
 

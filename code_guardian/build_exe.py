@@ -18,12 +18,14 @@ Instale Python 3.10+ em python.org e adicione ao PATH.
 """
 
 import sys
+import io
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
 import subprocess
 import shutil
 from pathlib import Path
 
 SCRIPT_DIR = Path(__file__).parent
-ROOT_DIR   = SCRIPT_DIR.parent.parent.parent  # raiz do repo
+ROOT_DIR   = SCRIPT_DIR.parent  # raiz do repo (code_review/)
 
 # Scripts Python que serão embutidos no exe como dados
 ANALYSIS_SCRIPTS = [

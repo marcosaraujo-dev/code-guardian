@@ -68,17 +68,17 @@ _HTML_COLORS = {
 
 
 def _find_guardian_dir() -> Path:
-    """Retorna o diretório .guardian/ na raiz do repositório git (ou CWD)."""
+    """Retorna o diretório .codeguardian/ na raiz do repositório git (ou CWD)."""
     try:
         root = subprocess.run(
             ["git", "rev-parse", "--show-toplevel"],
             capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=5,
         ).stdout.strip()
         if root:
-            return Path(root) / ".guardian"
+            return Path(root) / ".codeguardian"
     except Exception:
         pass
-    return Path.cwd() / ".guardian"
+    return Path.cwd() / ".codeguardian"
 
 
 def _resolve_file(name: str) -> str:
@@ -1176,7 +1176,7 @@ Exemplos:
         # --output especificado com .html — usa o caminho dado
         _write_html(Path(args.output))
     elif args.format != "json":
-        # Geração automática em .guardian/last-runner-report.html
+        # Geração automática em .codeguardian/last-runner-report.html
         _write_html(_find_guardian_dir() / "last-runner-report.html")
 
     # Escrever relatório texto/JSON — em arquivo ou stdout

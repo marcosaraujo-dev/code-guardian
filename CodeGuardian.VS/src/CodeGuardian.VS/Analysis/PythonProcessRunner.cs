@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -13,8 +15,6 @@ namespace CodeGuardian.VS.Analysis
     /// </summary>
     public sealed class PythonProcessRunner
     {
-        private static readonly string[] CandidatosPython = { "python", "py" };
-
         // Cache do executável que funcionou — evita re-probing a cada análise
         private string? _exeValidado;
         private string? _exeConfigurado;
@@ -36,6 +36,7 @@ namespace CodeGuardian.VS.Analysis
             string scriptPath,
             string[] args,
             string workingDir,
+            Dictionary<string, string>? envVars = null,
             CancellationToken ct = default)
         {
             // Ler cache fora do lock para não bloquear thread async
@@ -55,7 +56,7 @@ namespace CodeGuardian.VS.Analysis
             {
                 try
                 {
-                    return await ExecutarProcessoAsync(exeCache, scriptPath, args, workingDir, ct);
+                    return await ExecutarProcessoAsync(exeCache, scriptPath, args, workingDir, envVars, ct);
                 }
                 catch (OperationCanceledException)
                 {
@@ -69,14 +70,14 @@ namespace CodeGuardian.VS.Analysis
             }
 
             // Probing: testar candidatos e cachear o primeiro que funcionar
-            var candidatos = ObterCandidatos(pythonExe);
+            var candidatos = PythonLocator.ObterCandidatos(pythonExe).ToArray();
             Exception? ultimoErro = null;
 
             foreach (var candidato in candidatos)
             {
                 try
                 {
-                    var resultado = await ExecutarProcessoAsync(candidato, scriptPath, args, workingDir, ct);
+                    var resultado = await ExecutarProcessoAsync(candidato, scriptPath, args, workingDir, envVars, ct);
 
                     lock (_cacheLock)
                     {
@@ -107,40 +108,37 @@ namespace CodeGuardian.VS.Analysis
                 ultimoErro);
         }
 
-        private static string[] ObterCandidatos(string pythonExe)
-        {
-            if (!string.IsNullOrWhiteSpace(pythonExe) &&
-                pythonExe != "python" &&
-                pythonExe != "py")
-            {
-                // Caminho customizado configurado pelo usuário
-                return new[] { pythonExe };
-            }
-
-            return CandidatosPython;
-        }
-
         private static async Task<string> ExecutarProcessoAsync(
             string pythonExe,
             string scriptPath,
             string[] args,
             string workingDir,
+            Dictionary<string, string>? envVars,
             CancellationToken ct)
         {
             var argumentos = MontarArgumentos(scriptPath, args);
 
             var startInfo = new ProcessStartInfo
             {
-                FileName = pythonExe,
-                Arguments = argumentos,
-                WorkingDirectory = workingDir,
+                FileName               = pythonExe,
+                Arguments              = argumentos,
+                WorkingDirectory       = workingDir,
                 RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                UseShellExecute = false,
-                CreateNoWindow = true,
+                RedirectStandardError  = true,
+                UseShellExecute        = false,
+                CreateNoWindow         = true,
                 StandardOutputEncoding = Encoding.UTF8,
-                StandardErrorEncoding = Encoding.UTF8,
+                StandardErrorEncoding  = Encoding.UTF8,
             };
+
+            if (envVars != null)
+            {
+                foreach (var kv in envVars)
+                {
+                    if (!string.IsNullOrWhiteSpace(kv.Value))
+                        startInfo.EnvironmentVariables[kv.Key] = kv.Value;
+                }
+            }
 
             using var processo = new Process { StartInfo = startInfo, EnableRaisingEvents = true };
 

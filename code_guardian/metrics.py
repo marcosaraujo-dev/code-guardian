@@ -106,11 +106,29 @@ def _count_nesting(content: str) -> int:
     return max_level
 
 
+def _is_code_line(line: str) -> bool:
+    """Retorna True se a linha contém código real (não é comentário nem vazia)."""
+    stripped = line.strip()
+    if not stripped:
+        return False
+    if stripped.startswith("///"):
+        return False
+    if stripped.startswith("//"):
+        return False
+    if stripped.startswith("*") or stripped.startswith("/*"):
+        return False
+    return True
+
+
+def _count_code_lines(lines: list[str], start_i: int, end_i: int) -> int:
+    """Conta apenas linhas de código entre start_i e end_i (excluindo comentários e vazias)."""
+    return sum(1 for line in lines[start_i:end_i] if _is_code_line(line))
+
+
 def _extract_methods(lines: list[str]) -> list[MethodMetrics]:
-    """Extrai métodos do arquivo com suas linhas."""
+    """Extrai métodos do arquivo com suas linhas de código (excluindo comentários e linhas vazias)."""
     methods = []
 
-    # Padrão para detectar métodos C# (simplificado mas funcional)
     method_pattern = re.compile(
         r'^\s*(public|private|protected|internal|protected\s+internal|private\s+protected)'
         r'(?:\s+(?:static|virtual|override|abstract|sealed|async|new|extern))*'
@@ -129,10 +147,10 @@ def _extract_methods(lines: list[str]) -> list[MethodMetrics]:
             is_public = "public" in access_mod
             method_starts.append((i, method_name, is_public))
 
-    # Calcular tamanho aproximado de cada método
     for idx, (start_i, name, is_public) in enumerate(method_starts):
         end_i = method_starts[idx + 1][0] if idx + 1 < len(method_starts) else len(lines)
-        line_count = end_i - start_i
+        # Contar apenas linhas de código, ignorando doc comments e linhas vazias
+        line_count = _count_code_lines(lines, start_i, end_i)
 
         methods.append(MethodMetrics(
             name=name,
@@ -169,7 +187,9 @@ def analyze_file(file_path: str) -> FileMetrics:
         })
         return metrics
 
-    metrics = FileMetrics(file=file_path, total_lines=len(lines))
+    total_lines = len(lines)
+    code_lines  = sum(1 for l in lines if _is_code_line(l))
+    metrics = FileMetrics(file=file_path, total_lines=total_lines)
 
     # Extrair métodos
     methods = _extract_methods(lines)
@@ -187,7 +207,7 @@ def analyze_file(file_path: str) -> FileMetrics:
     class_metrics = ClassMetrics(
         name=file_path.split("\\")[-1].replace(".cs", ""),
         start_line=1,
-        line_count=len(lines),
+        line_count=code_lines,
         methods=methods,
         constructor_deps=constructor_deps,
         public_method_count=len(public_methods),
@@ -245,15 +265,15 @@ def analyze_file(file_path: str) -> FileMetrics:
             )
         })
 
-    # Arquivo muito longo
-    if len(lines) > MAX_CLASS_LINES:
+    # Arquivo muito longo (conta apenas linhas de código, sem doc comments e vazias)
+    if code_lines > MAX_CLASS_LINES:
         metrics.issues.append({
             "line": 1,
             "severity": "info",
             "category": "Arquivo Grande",
             "message": (
-                f"Arquivo com {len(lines)} linhas "
-                f"(máximo recomendado: {MAX_CLASS_LINES}). Avaliar separação de responsabilidades."
+                f"Arquivo com {total_lines} linhas totais / {code_lines} linhas de código "
+                f"(máximo recomendado: {MAX_CLASS_LINES} linhas de código). Avaliar separação de responsabilidades."
             )
         })
 

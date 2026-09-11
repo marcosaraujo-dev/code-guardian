@@ -9,10 +9,9 @@
     },
     "overview": "docs/marketplace-description.md",
     "priceCategory": "free",
-    "publisher": "MarcosAraujo",
+    "publisher": "cygnusforge",
     "private": false,
     "qna": false,
-    "repo": "https://github.com/marcosaraujo-dev/code-guardian",
     "tags": [
         "code review",
         "code analysis",

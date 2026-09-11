@@ -36,15 +36,20 @@ namespace CodeGuardian.VS.Package
         private GuardianErrorListService? _errorListService;
         private HookInstallService? _hookService;
         private uint _rdtCookie;
+        private IVsRunningDocumentTable? _rdt;
 
         // Debounce: evita disparar análise múltipla quando o arquivo é salvo rapidamente
         private readonly ConcurrentDictionary<string, CancellationTokenSource> _debounceTokens =
             new ConcurrentDictionary<string, CancellationTokenSource>(StringComparer.OrdinalIgnoreCase);
 
+        /// <summary>
+        /// Expoe o servico de hooks para que a Tool Window possa consultar e alterar o estado.
+        /// </summary>
+        public HookInstallService? HookService => _hookService;
+
         protected override async Task InitializeAsync(CancellationToken cancellationToken, IProgress<ServiceProgressData> progress)
         {
             // 1. Registrar ICodeGuardianSettingsProvider (this) como servico sincrono
-            //    Permite que GuardianAnalysisService acesse configuracoes sem depender do Package diretamente
             AddService(typeof(ICodeGuardianSettingsProvider), (container, ct, type) =>
                 System.Threading.Tasks.Task.FromResult<object>(this), promote: true);
 
@@ -55,14 +60,13 @@ namespace CodeGuardian.VS.Package
                 return System.Threading.Tasks.Task.FromResult<object>(_analysisService);
             }, promote: true);
 
-            // Aguardar o servico ser construido antes de prosseguir
             await GetServiceAsync(typeof(SGuardianAnalysisService));
 
             await JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
 
             // 3. Assinar IVsRunningDocumentTable para eventos de save
-            var rdt = await GetServiceAsync(typeof(SVsRunningDocumentTable)) as IVsRunningDocumentTable;
-            rdt?.AdviseRunningDocTableEvents(this, out _rdtCookie);
+            _rdt = await GetServiceAsync(typeof(SVsRunningDocumentTable)) as IVsRunningDocumentTable;
+            _rdt?.AdviseRunningDocTableEvents(this, out _rdtCookie);
 
             // 4. Inicializar Error List
             var componentModel = await GetServiceAsync(typeof(SComponentModel)) as IComponentModel;
@@ -81,6 +85,7 @@ namespace CodeGuardian.VS.Package
             await OpenToolWindowCommand.InitializeAsync(this);
             await AnalyzeFileCommand.InitializeAsync(this);
             await AnalyzeSolutionCommand.InitializeAsync(this);
+            await ExportSarifCommand.InitializeAsync(this);
 
             if (_hookService != null)
                 await InstallHooksCommand.InitializeAsync(this, _hookService);
@@ -103,41 +108,29 @@ namespace CodeGuardian.VS.Package
 
         public int OnAfterSave(uint docCookie)
         {
+            ThreadHelper.ThrowIfNotOnUIThread();
+
+            if (_rdt == null || _analysisService == null)
+                return VSConstants.S_OK;
+
+            _rdt.GetDocumentInfo(docCookie, out _, out _, out _, out var moniker, out _, out _, out _);
+            if (string.IsNullOrEmpty(moniker) || !moniker.EndsWith(".cs", StringComparison.OrdinalIgnoreCase))
+                return VSConstants.S_OK;
+
+            var cfg = GetSettings();
+            if (!cfg.AnalyzeOnSave)
+                return VSConstants.S_OK;
+
+            // Debounce: cancelar análise pendente se o arquivo for salvo novamente em menos de 1.5s
+            if (_debounceTokens.TryRemove(moniker, out var anterior))
+                anterior.Cancel();
+
+            var debounce = new CancellationTokenSource();
+            _debounceTokens[moniker] = debounce;
+
+            var capturedMoniker = moniker;
             _ = JoinableTaskFactory.RunAsync(async () =>
             {
-                await JoinableTaskFactory.SwitchToMainThreadAsync();
-
-#pragma warning disable VSTHRD103 // já estamos no main thread após SwitchToMainThreadAsync
-                var rdt = GetService(typeof(SVsRunningDocumentTable)) as IVsRunningDocumentTable;
-#pragma warning restore VSTHRD103
-                if (rdt == null) return;
-
-                rdt.GetDocumentInfo(docCookie,
-                    out _,  // grfRDTFlags
-                    out _,  // dwReadLocks
-                    out _,  // dwEditLocks
-                    out var moniker,
-                    out _,  // pHier
-                    out _,  // itemId
-                    out _); // ppunkDocData
-
-                if (string.IsNullOrEmpty(moniker))
-                    return;
-
-                if (!moniker.EndsWith(".cs", StringComparison.OrdinalIgnoreCase))
-                    return;
-
-                var cfg = GetSettings();
-                if (!cfg.AnalyzeOnSave)
-                    return;
-
-                // Debounce: cancelar análise pendente se o arquivo for salvo novamente em menos de 1.5s
-                if (_debounceTokens.TryRemove(moniker, out var anterior))
-                    anterior.Cancel();
-
-                var debounce = new CancellationTokenSource();
-                _debounceTokens[moniker] = debounce;
-
                 try
                 {
                     await System.Threading.Tasks.Task.Delay(DEBOUNCE_DELAY_MS, debounce.Token).ConfigureAwait(false);
@@ -147,10 +140,9 @@ namespace CodeGuardian.VS.Package
                     return; // Novo save chegou para este arquivo — esta análise é descartada
                 }
 
-                _debounceTokens.TryRemove(moniker, out _);
-
+                _debounceTokens.TryRemove(capturedMoniker, out _);
                 if (_analysisService != null)
-                    await _analysisService.AnalyzeFileAsync(moniker);
+                    await _analysisService.AnalyzeFileAsync(capturedMoniker);
             });
 
             return VSConstants.S_OK;
@@ -176,8 +168,7 @@ namespace CodeGuardian.VS.Package
 
                 if (_rdtCookie != 0)
                 {
-                    var rdt = GetService(typeof(SVsRunningDocumentTable)) as IVsRunningDocumentTable;
-                    rdt?.UnadviseRunningDocTableEvents(_rdtCookie);
+                    _rdt?.UnadviseRunningDocTableEvents(_rdtCookie);
                     _rdtCookie = 0;
                 }
 
