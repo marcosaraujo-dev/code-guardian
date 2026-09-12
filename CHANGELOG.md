@@ -5,6 +5,18 @@ Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/).
 
 ---
 
+## [1.0.11] - 2026-09-12
+
+### Alterado
+
+#### Python — `rule_engine.py`
+- **`NARRATIVE_COMMENT` passa de severidade `warning` para `error`** (bloqueia o Stop hook por padrão, `--fail-on error`), a pedido do usuário do harness — quer que comentário-sem-substância (narra o quê, não o porquê) seja tratado como violação bloqueante, não só um aviso no relatório, assumindo o risco de falso positivo inerente à heurística (regex, não NLP). Escape hatch inalterado: `// guardian: suppress NARRATIVE_COMMENT` na linha anterior à flagrada.
+- Corrigido em conjunto: o gate interno de `analyze_file()` que decide se `_detect_narrative_comments()` roda dependendo de `--severity` estava comparando contra o limiar de `"warning"` — ficou desalinhado da severidade real da issue após a mudança acima (com `--severity error`, o comentário deixaria de ser reportado mesmo já sendo `error`). Ajustado para comparar contra `"error"`.
+
+Testes atualizados: `TC-RE-029` (agora espera exit 1) e `TC-RE-030` (agora espera `NARRATIVE_COMMENT` presente com `--severity error`) em `tests/run_tests.py` — suíte completa: 83/83 passando.
+
+---
+
 ## [1.0.10] - 2026-09-12
 
 ### Adicionado

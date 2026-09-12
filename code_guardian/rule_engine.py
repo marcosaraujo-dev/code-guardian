@@ -23,9 +23,11 @@ from dataclasses import dataclass, asdict
 #   1. Abre com frase narrativa clássica ("this function...", "este método...").
 #   2. Alta sobreposição de palavras com a linha de código logo abaixo (o
 #      comentário só está reformulando o código, não agregando contexto).
-# Falsos positivos/negativos são esperados (é regex/heurística, não NLP de
-# verdade) — por isso a severidade é sempre "warning", nunca bloqueia o Stop
-# hook por padrão (--fail-on error).
+# Severidade "error" (bloqueia o Stop hook por padrão, --fail-on error) — decisão
+# deliberada do usuário do harness para forçar comentário só-o-que fora do código,
+# assumindo o risco de falso positivo da heurística (é regex, não NLP). Escape
+# hatch para esse caso: comentário "// guardian: suppress NARRATIVE_COMMENT" na
+# linha anterior à flagrada (ver _is_line_suppressed).
 _NARRATIVE_OPENERS = (
     "this function", "this method", "this class", "this loop", "this block",
     "this constructor", "this property",
@@ -368,7 +370,7 @@ def _detect_narrative_comments(lines: list[str], file_path: str) -> list[Issue]:
         issues.append(Issue(
             file=file_path,
             line=i + 1,
-            severity="warning",
+            severity="error",
             category="Comentário sem substância",
             rule_id="NARRATIVE_COMMENT",
             message=(
@@ -463,7 +465,7 @@ def analyze_file(file_path: str, min_severity: str = "info") -> list[Issue]:
 
     # NARRATIVE_COMMENT não é uma regra de RULES (precisa olhar a linha de código
     # seguinte ao comentário, não só a própria linha) — checagem dedicada.
-    if severity_order.get("warning", 3) <= min_level and "NARRATIVE_COMMENT" not in file_suppressions:
+    if severity_order.get("error", 3) <= min_level and "NARRATIVE_COMMENT" not in file_suppressions:
         issues.extend(_detect_narrative_comments(lines, file_path))
 
     return issues

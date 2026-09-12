@@ -241,15 +241,15 @@ def test_rule_engine():
     check("TC-RE-028", "Comentario com sinal de PORQUE (Workaround:) nao dispara (falso positivo)",
           ok and not any(15 <= i.get("line", 0) <= 16 for i in narrative_issues),
           f"NARRATIVE_COMMENT encontrados nas linhas={[i.get('line') for i in narrative_issues]}")
-    check("TC-RE-029", "NARRATIVE_COMMENT nunca causa exit 1 (severidade warning, nao bloqueia por padrao)",
-          code == 0,
+    check("TC-RE-029", "NARRATIVE_COMMENT causa exit 1 (severidade error, bloqueia por padrao --fail-on error)",
+          code == 1,
           f"exit={code}")
 
-    # TC-RE-030 — --severity error filtra NARRATIVE_COMMENT (warning)
+    # TC-RE-030 — --severity error mantem NARRATIVE_COMMENT (severidade error)
     code, out, _ = run([PY, RULE_ENGINE, f("narrative_comments.cs"), "--format", "json", "--severity", "error"])
     ok, data = json_ok(out)
-    check("TC-RE-030", "--severity error filtra NARRATIVE_COMMENT (severidade warning)",
-          ok and not any(i.get("rule_id") == "NARRATIVE_COMMENT" for i in (data or [])),
+    check("TC-RE-030", "--severity error mantem NARRATIVE_COMMENT (severidade error)",
+          ok and any(i.get("rule_id") == "NARRATIVE_COMMENT" for i in (data or [])),
           f"rules={[i.get('rule_id') for i in (data or [])]}")
 
     # TC-RE-031 — /// doc comment nao dispara NARRATIVE_COMMENT
