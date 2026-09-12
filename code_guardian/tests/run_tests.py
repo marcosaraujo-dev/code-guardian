@@ -228,6 +228,37 @@ def test_rule_engine():
           "L" in out and any(c.isdigit() for c in out),
           f"saida={out[:200]}")
 
+    # TC-RE-026/027/028 — NARRATIVE_COMMENT (comentario sem substancia)
+    code, out, _ = run([PY, RULE_ENGINE, f("narrative_comments.cs"), "--format", "json"])
+    ok, data = json_ok(out)
+    narrative_issues = [i for i in (data or []) if i.get("rule_id") == "NARRATIVE_COMMENT"]
+    check("TC-RE-026", "Detecta comentario com abertura narrativa ('This function...')",
+          ok and any(i.get("line") == 9 for i in narrative_issues),
+          f"NARRATIVE_COMMENT encontrados nas linhas={[i.get('line') for i in narrative_issues]}")
+    check("TC-RE-027", "Detecta comentario que parafraseia a linha seguinte (alta sobreposicao)",
+          ok and any(i.get("line") == 12 for i in narrative_issues),
+          f"NARRATIVE_COMMENT encontrados nas linhas={[i.get('line') for i in narrative_issues]}")
+    check("TC-RE-028", "Comentario com sinal de PORQUE (Workaround:) nao dispara (falso positivo)",
+          ok and not any(15 <= i.get("line", 0) <= 16 for i in narrative_issues),
+          f"NARRATIVE_COMMENT encontrados nas linhas={[i.get('line') for i in narrative_issues]}")
+    check("TC-RE-029", "NARRATIVE_COMMENT nunca causa exit 1 (severidade warning, nao bloqueia por padrao)",
+          code == 0,
+          f"exit={code}")
+
+    # TC-RE-030 — --severity error filtra NARRATIVE_COMMENT (warning)
+    code, out, _ = run([PY, RULE_ENGINE, f("narrative_comments.cs"), "--format", "json", "--severity", "error"])
+    ok, data = json_ok(out)
+    check("TC-RE-030", "--severity error filtra NARRATIVE_COMMENT (severidade warning)",
+          ok and not any(i.get("rule_id") == "NARRATIVE_COMMENT" for i in (data or [])),
+          f"rules={[i.get('rule_id') for i in (data or [])]}")
+
+    # TC-RE-031 — /// doc comment nao dispara NARRATIVE_COMMENT
+    code, out, _ = run([PY, RULE_ENGINE, f("clean.cs"), "--format", "json"])
+    ok, data = json_ok(out)
+    check("TC-RE-031", "Arquivo limpo (com /// se houver) nao dispara NARRATIVE_COMMENT",
+          ok and not any(i.get("rule_id") == "NARRATIVE_COMMENT" for i in (data or [])),
+          f"rules={[i.get('rule_id') for i in (data or [])]}")
+
 
 # ---------------------------------------------------------------------------
 # TC-ME — metrics.py
@@ -313,6 +344,35 @@ def test_metrics():
     check("TC-ME-012", "Arquivo inexistente retorna issue e exit 1",
           ok and len(issues) > 0 and code == 1,
           f"exit={code} issues={issues}")
+
+    # TC-ME-015/016/017 — duplicacao literal de metodos
+    code, out, _ = run([PY, METRICS, f("duplicate_methods.cs"), "--format", "json"])
+    ok, data = json_ok(out)
+    issues = data.get("issues", []) if data else []
+    dup_issues = [i for i in issues if i.get("category") == "Duplicação"]
+    check("TC-ME-015", "Metodos com corpo identico disparam issue de Duplicacao (severidade error)",
+          ok and len(dup_issues) == 1 and dup_issues[0].get("severity") == "error",
+          f"dup_issues={dup_issues}")
+    check("TC-ME-016", "Mensagem de duplicacao cita os dois metodos envolvidos",
+          ok and dup_issues and "CalculateOrderTotal" in dup_issues[0].get("message", "")
+          and "CalculateInvoiceTotal" in dup_issues[0].get("message", ""),
+          f"message={dup_issues[0].get('message', '') if dup_issues else '?'}")
+    check("TC-ME-017", "Metodo curto e diferente (SumSmall) nao entra na duplicacao (sem falso positivo)",
+          ok and not any("SumSmall" in i.get("message", "") for i in dup_issues),
+          f"dup_issues={dup_issues}")
+    check("TC-ME-018", "Duplicacao de metodo causa exit 1 (severidade error bloqueia)",
+          code == 1,
+          f"exit={code}")
+
+    # TC-ME-019 — hash de corpo nao inclui a linha de assinatura (nomes diferentes, corpo igual)
+    code, out, _ = run([PY, METRICS, f("duplicate_methods.cs"), "--format", "json"])
+    ok, data = json_ok(out)
+    methods = data.get("classes", [{}])[0].get("methods", []) if ok else []
+    hashes = {m["name"]: m.get("body_hash", "") for m in methods}
+    check("TC-ME-019", "body_hash de CalculateOrderTotal e CalculateInvoiceTotal e identico",
+          ok and hashes.get("CalculateOrderTotal") and
+          hashes.get("CalculateOrderTotal") == hashes.get("CalculateInvoiceTotal"),
+          f"hashes={hashes}")
 
     # TC-ME-013/014 — estrutura JSON obrigatoria
     code, out, _ = run([PY, METRICS, f("clean.cs"), "--format", "json"])

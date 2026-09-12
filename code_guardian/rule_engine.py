@@ -16,6 +16,42 @@ import json
 import re
 from dataclasses import dataclass, asdict
 
+# ── Comentários sem substância (NARRATIVE_COMMENT) ──────────────────────────
+# Heurística, não substitui revisão humana: comentário deveria justificar o
+# PORQUÊ (motivo não óbvio, trade-off, workaround) — não narrar o QUE o código
+# já deixa claro por si só. Dois sinais, cada um suficiente para marcar:
+#   1. Abre com frase narrativa clássica ("this function...", "este método...").
+#   2. Alta sobreposição de palavras com a linha de código logo abaixo (o
+#      comentário só está reformulando o código, não agregando contexto).
+# Falsos positivos/negativos são esperados (é regex/heurística, não NLP de
+# verdade) — por isso a severidade é sempre "warning", nunca bloqueia o Stop
+# hook por padrão (--fail-on error).
+_NARRATIVE_OPENERS = (
+    "this function", "this method", "this class", "this loop", "this block",
+    "this constructor", "this property",
+    "esta função", "este método", "esta classe", "este loop", "este bloco",
+    "este construtor", "esta propriedade",
+    "isso é responsável por", "this is responsible for",
+    "aqui nós", "here we", "we are", "nós estamos",
+)
+
+_WHY_MARKERS = (
+    "porque", "pois", "já que", "ja que", "workaround", "cuidado", "atenção",
+    "atencao", "nota:", "note:", "because", "since ", "obs:", "importante:",
+)
+
+_STOPWORDS = frozenset({
+    "the", "a", "an", "de", "da", "do", "das", "dos", "para", "com", "que",
+    "e", "o", "os", "as", "um", "uma", "and", "or", "ou", "to", "in", "on",
+    "is", "are", "of", "se", "no", "na", "por", "seu", "sua",
+})
+
+_TOKEN_PATTERN = re.compile(r"[a-zA-ZÀ-ú_]{3,}")
+
+
+def _tokenize_for_overlap(text: str) -> set[str]:
+    return {w for w in _TOKEN_PATTERN.findall(text.lower()) if w not in _STOPWORDS}
+
 RULES = [
     # ── CRITICAL ──────────────────────────────────────────────────────────────
     {
@@ -287,6 +323,64 @@ def _is_line_suppressed(lines: list[str], line_num: int, rule_id: str) -> bool:
     return False
 
 
+def _detect_narrative_comments(lines: list[str], file_path: str) -> list[Issue]:
+    """Detecta comentários `//` que só parafraseiam a linha de código seguinte."""
+    issues: list[Issue] = []
+
+    for i, line in enumerate(lines):
+        stripped = line.strip()
+        if not stripped.startswith("//") or stripped.startswith("///"):
+            continue  # /// é doc comment (XML) — descrever a API pública é o propósito dele
+
+        comment_text = stripped.lstrip("/").strip()
+        if len(comment_text) < 8:
+            continue  # comentário curto demais pra avaliar com confiança
+
+        lower = comment_text.lower()
+        if any(marker in lower for marker in ("todo", "fixme", "hack")):
+            continue  # já coberto por TODO_COMMENT/FIXME_COMMENT/HACK_COMMENT
+        if any(marker in lower for marker in _WHY_MARKERS):
+            continue  # tem sinal de "PORQUÊ" — não é comentário vazio
+
+        next_code_line = None
+        for j in range(i + 1, min(i + 4, len(lines))):
+            if not _is_comment_or_string(lines[j], 0) and lines[j].strip():
+                next_code_line = lines[j]
+                break
+        if next_code_line is None:
+            continue
+
+        is_narrative = lower.startswith(_NARRATIVE_OPENERS)
+        comment_tokens = _tokenize_for_overlap(comment_text)
+        overlap_ratio = 0.0
+        if comment_tokens:
+            code_tokens = _tokenize_for_overlap(next_code_line)
+            overlap_ratio = len(comment_tokens & code_tokens) / len(comment_tokens)
+
+        if not (is_narrative or overlap_ratio >= 0.6):
+            continue
+
+        if _is_line_suppressed(lines, i + 1, "NARRATIVE_COMMENT"):
+            continue
+
+        motivo = ("abre com frase narrativa (\"this function...\"/\"este método...\")" if is_narrative
+                   else f"parafraseia a linha de código seguinte ({overlap_ratio:.0%} de sobreposição de palavras)")
+        issues.append(Issue(
+            file=file_path,
+            line=i + 1,
+            severity="warning",
+            category="Comentário sem substância",
+            rule_id="NARRATIVE_COMMENT",
+            message=(
+                f"Comentário parece descrever O QUE o código faz, não POR QUÊ — {motivo}. "
+                "Comentários devem justificar decisões não óbvias (motivo, trade-off, workaround), "
+                "não narrar o que o código já deixa claro. Considere remover ou reescrever explicando o porquê."
+            )
+        ))
+
+    return issues
+
+
 def analyze_file(file_path: str, min_severity: str = "info") -> list[Issue]:
     """Analisa um arquivo C# e retorna issues encontradas."""
     severity_order = {"critical": 0, "error": 1, "warning": 2, "info": 3}
@@ -366,6 +460,11 @@ def analyze_file(file_path: str, min_severity: str = "info") -> list[Issue]:
                         rule_id=rule_id,
                         message=rule["message"]
                     ))
+
+    # NARRATIVE_COMMENT não é uma regra de RULES (precisa olhar a linha de código
+    # seguinte ao comentário, não só a própria linha) — checagem dedicada.
+    if severity_order.get("warning", 3) <= min_level and "NARRATIVE_COMMENT" not in file_suppressions:
+        issues.extend(_detect_narrative_comments(lines, file_path))
 
     return issues
 

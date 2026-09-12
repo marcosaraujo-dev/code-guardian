@@ -17,6 +17,7 @@ Uso:
 import sys
 import io
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
+import hashlib
 import json
 import re
 from dataclasses import dataclass, asdict, field
@@ -26,6 +27,7 @@ MAX_NESTING = 5  # namespace + class já consomem 2 níveis em C#
 MAX_CONSTRUCTOR_DEPS = 5
 MAX_PUBLIC_METHODS = 10
 MAX_CLASS_LINES = 300
+MIN_DUPLICATE_LINES = 5  # métodos com menos linhas de código são ignorados (getters/one-liners geram ruído)
 
 
 @dataclass
@@ -34,6 +36,7 @@ class MethodMetrics:
     start_line: int
     line_count: int
     is_public: bool
+    body_hash: str = ""  # hash do corpo normalizado (vazio = método curto demais para checar duplicação)
 
 
 @dataclass
@@ -125,6 +128,40 @@ def _count_code_lines(lines: list[str], start_i: int, end_i: int) -> int:
     return sum(1 for line in lines[start_i:end_i] if _is_code_line(line))
 
 
+def _normalize_body(lines: list[str], start_i: int, end_i: int) -> str:
+    """
+    Normaliza o corpo de um método para comparação de duplicação: mantém só linhas de
+    código (sem comentários/vazias), colapsa espaços internos e remove indentação.
+    Deliberadamente NÃO normaliza nomes de identificadores — detecta cópia/cola literal,
+    não duplicação estrutural com variáveis renomeadas (isso exigiria um parser de verdade
+    e teria uma taxa de falso positivo muito maior para uma checagem determinística).
+    """
+    normalized = []
+    for line in lines[start_i:end_i]:
+        if not _is_code_line(line):
+            continue
+        normalized.append(re.sub(r"\s+", " ", line.strip()))
+    return "\n".join(normalized)
+
+
+def _find_duplicated_methods(methods: list[MethodMetrics]) -> list[tuple[MethodMetrics, MethodMetrics]]:
+    """Agrupa métodos com hash de corpo idêntico (duplicata literal exata)."""
+    by_hash: dict[str, list[MethodMetrics]] = {}
+    for m in methods:
+        if not m.body_hash:
+            continue
+        by_hash.setdefault(m.body_hash, []).append(m)
+
+    pairs: list[tuple[MethodMetrics, MethodMetrics]] = []
+    for group in by_hash.values():
+        if len(group) < 2:
+            continue
+        for i in range(len(group)):
+            for j in range(i + 1, len(group)):
+                pairs.append((group[i], group[j]))
+    return pairs
+
+
 def _extract_methods(lines: list[str]) -> list[MethodMetrics]:
     """Extrai métodos do arquivo com suas linhas de código (excluindo comentários e linhas vazias)."""
     methods = []
@@ -152,11 +189,20 @@ def _extract_methods(lines: list[str]) -> list[MethodMetrics]:
         # Contar apenas linhas de código, ignorando doc comments e linhas vazias
         line_count = _count_code_lines(lines, start_i, end_i)
 
+        body_hash = ""
+        if line_count >= MIN_DUPLICATE_LINES:
+            # start_i+1 pula a linha de assinatura (contém o nome do método, que é
+            # sempre diferente entre duas duplicatas por definição — incluí-la faria
+            # o hash nunca bater mesmo para corpos 100% idênticos).
+            normalized = _normalize_body(lines, start_i + 1, end_i)
+            body_hash = hashlib.sha256(normalized.encode("utf-8")).hexdigest()
+
         methods.append(MethodMetrics(
             name=name,
             start_line=start_i + 1,
             line_count=line_count,
-            is_public=is_public
+            is_public=is_public,
+            body_hash=body_hash
         ))
 
     return methods
@@ -228,6 +274,25 @@ def analyze_file(file_path: str) -> FileMetrics:
                     f"(máximo recomendado: {MAX_METHOD_LINES}). Extrair em métodos menores."
                 )
             })
+
+    # Duplicação literal de métodos (copy/paste) — severidade error: ao contrário das
+    # demais métricas (sempre warning/info), duplicação exata é um sinal objetivo e de
+    # baixíssimo falso-positivo, por isso bloqueia o Stop hook por padrão (--fail-on error).
+    # Limitação conhecida: só compara métodos DENTRO do mesmo arquivo (metrics.py roda por
+    # arquivo) e só pega duplicata EXATA pós-normalização de espaços — duplicação com
+    # variáveis renomeadas ou reordenação de statements não é detectada.
+    for original, duplicate in _find_duplicated_methods(methods):
+        metrics.issues.append({
+            "line": duplicate.start_line,
+            "severity": "error",
+            "category": "Duplicação",
+            "message": (
+                f"Método '{duplicate.name}' (L{duplicate.start_line}) é duplicata literal de "
+                f"'{original.name}' (L{original.start_line}) — {duplicate.line_count} linhas de "
+                f"código idênticas (ignorando espaços). Extraia a lógica comum para um método "
+                f"compartilhado em vez de copiar/colar."
+            )
+        })
 
     # Nesting profundo
     if max_nesting > MAX_NESTING:

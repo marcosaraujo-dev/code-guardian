@@ -48,7 +48,7 @@
 | **Segurança** | SQL Injection, secrets hardcoded, path traversal, deserialização insegura |
 | **Confiabilidade** | Exception swallowing, catch vazio, loops sem condição de saída |
 | **Performance** | Padrão N+1, concatenação de string em loop, ausência de CancellationToken |
-| **Clean Code** | God Class, métodos > 30 linhas, nesting > 5 níveis, magic numbers |
+| **Clean Code** | God Class, métodos > 30 linhas, nesting > 5 níveis, magic numbers, duplicação literal de métodos (copy/paste), comentários sem substância (narram o quê, não o porquê) |
 | **Async/Await** | `.Result` / `.Wait()` gerando deadlock, fire-and-forget sem tratamento |
 | **VB6** | SQL Injection, error handling incorreto, violações de arquitetura clsN/clsD |
 

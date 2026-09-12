@@ -15,7 +15,7 @@ Code Guardian analisa seus arquivos C# por demanda — detectando vulnerabilidad
 | **Segurança** | SQL Injection, secrets hardcoded, path traversal, deserialização perigosa |
 | **Confiabilidade** | Exceções swallowed, catch blocks vazios, loops sem limites |
 | **Performance** | Padrões N+1, concatenação de strings em loops, `CancellationToken` ausente |
-| **Clean Code** | God Class, métodos acima de 30 linhas, nesting profundo (5+ níveis), magic numbers |
+| **Clean Code** | God Class, métodos acima de 30 linhas, nesting profundo (5+ níveis), magic numbers, duplicação literal de métodos (copy/paste), comentários sem substância (narram o quê, não o porquê) |
 | **Async/Await** | Padrões de deadlock `.Result`/`.Wait()`, fire-and-forget sem tratamento de erro |
 
 ---

@@ -5,6 +5,18 @@ Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/).
 
 ---
 
+## [1.0.10] - 2026-09-12
+
+### Adicionado
+
+#### Python — `metrics.py`
+- **Detecção de duplicação literal de métodos** (categoria "Duplicação", severidade `error` — bloqueia por padrão, ao contrário das demais métricas que são `warning`/`info`): cada método com 5+ linhas de código ganha um `body_hash` (SHA-256 do corpo normalizado, sem a linha de assinatura nem espaços supérfluos); dois métodos com hash idêntico no mesmo arquivo geram issue citando os dois nomes e linhas. Detecta cópia/cola literal, não duplicação estrutural com variáveis renomeadas (exigiria parser real; ficaria com falso-positivo alto demais para uma checagem determinística). Só compara métodos dentro do mesmo arquivo — duplicação entre arquivos diferentes não é detectada nesta versão.
+
+#### Python — `rule_engine.py`
+- **`NARRATIVE_COMMENT` — comentário sem substância** (severidade `warning`, nunca bloqueia por padrão): heurística para comentários `//` (não `///`, que são doc comments legítimos) que só narram O QUE o código faz em vez de justificar O PORQUÊ. Dois sinais, cada um suficiente: (1) abre com frase narrativa clássica ("this function...", "este método..."); (2) alta sobreposição de palavras (≥60%) com a linha de código imediatamente seguinte. Comentários com marcador de "porquê" (`workaround`, `porque`, `nota:`, etc.) ou já cobertos por `TODO_COMMENT`/`FIXME_COMMENT`/`HACK_COMMENT` são ignorados. É heurística, não NLP — falso-positivo/negativo esperado, por isso a severidade nunca bloqueia o Stop hook por padrão (`--fail-on error`).
+
+Fixtures novas: `tests/fixtures/duplicate_methods.cs`, `tests/fixtures/narrative_comments.cs`. 13 casos de teste novos em `tests/run_tests.py` (TC-ME-015..019, TC-RE-026..031) — suíte completa: 83/83 passando.
+
 ## [1.0.9] - 2026-05-15
 
 ### Corrigido
