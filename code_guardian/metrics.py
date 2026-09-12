@@ -144,6 +144,64 @@ def _normalize_body(lines: list[str], start_i: int, end_i: int) -> str:
     return "\n".join(normalized)
 
 
+def _find_method_body_end(lines: list[str], start_i: int) -> int:
+    """
+    Encontra o índice (exclusivo) onde o corpo do método termina, contando chaves reais
+    (ignorando strings/comentários) a partir da linha de assinatura até o fechamento da
+    primeira chave aberta voltar a profundidade zero. Usado só para o ÚLTIMO método do
+    arquivo: sem um próximo método para servir de limite, `end_i = len(lines)` incluiria
+    as chaves de fechamento da classe/namespace externos no corpo do método, inflando
+    `line_count` e corrompendo o `body_hash` (duas duplicatas literais deixam de bater
+    se uma delas for a última do arquivo).
+    """
+    depth = 0
+    started = False
+    in_string = False
+    in_char = False
+    in_block_comment = False
+
+    for i in range(start_i, len(lines)):
+        line = lines[i]
+        j = 0
+        while j < len(line):
+            c = line[j]
+            next_c = line[j + 1] if j + 1 < len(line) else ""
+
+            if in_block_comment:
+                if c == "*" and next_c == "/":
+                    in_block_comment = False
+                    j += 2
+                    continue
+                j += 1
+                continue
+
+            if not in_string and not in_char and c == "/" and next_c == "/":
+                break
+
+            if not in_string and not in_char and c == "/" and next_c == "*":
+                in_block_comment = True
+                j += 2
+                continue
+
+            if c == '"' and not in_char:
+                in_string = not in_string
+            elif c == "'" and not in_string:
+                in_char = not in_char
+
+            if not in_string and not in_char:
+                if c == "{":
+                    depth += 1
+                    started = True
+                elif c == "}":
+                    depth -= 1
+                    if started and depth == 0:
+                        return i + 1
+
+            j += 1
+
+    return len(lines)
+
+
 def _find_duplicated_methods(methods: list[MethodMetrics]) -> list[tuple[MethodMetrics, MethodMetrics]]:
     """Agrupa métodos com hash de corpo idêntico (duplicata literal exata)."""
     by_hash: dict[str, list[MethodMetrics]] = {}
@@ -185,7 +243,10 @@ def _extract_methods(lines: list[str]) -> list[MethodMetrics]:
             method_starts.append((i, method_name, is_public))
 
     for idx, (start_i, name, is_public) in enumerate(method_starts):
-        end_i = method_starts[idx + 1][0] if idx + 1 < len(method_starts) else len(lines)
+        if idx + 1 < len(method_starts):
+            end_i = method_starts[idx + 1][0]
+        else:
+            end_i = _find_method_body_end(lines, start_i)
         # Contar apenas linhas de código, ignorando doc comments e linhas vazias
         line_count = _count_code_lines(lines, start_i, end_i)
 
