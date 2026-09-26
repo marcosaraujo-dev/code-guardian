@@ -11,7 +11,10 @@ $binDir  = "$src\bin\Release\net472"
 $objDir  = "$src\obj\Release\net472\net472"
 $resDir  = "$src\Resources"
 $out     = "$root\release\CodeGuardian.VS.vsix"
-$msbuild = "C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin\MSBuild.exe"
+# MSBuild da instalação mais recente do Visual Studio (2022, 18...), via vswhere
+$vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+$msbuild = & $vswhere -latest -prerelease -requires Microsoft.Component.MSBuild -find 'MSBuild\**\Bin\MSBuild.exe' | Select-Object -First 1
+if (-not $msbuild) { throw "MSBuild nao encontrado via vswhere ($vswhere). Instale o Visual Studio com o workload de extensoes." }
 
 # 1. Build sem clean (preserva pkgdef gerado pelo VS) — pulado se -SkipBuild
 if (-not $SkipBuild) {
