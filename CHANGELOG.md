@@ -15,6 +15,9 @@ Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/).
 - Extensão VS: a busca estava duplicada em `DependencyChecker` e `GuardianAnalysisService`; agora ambos usam `PythonLocator.LocalizarRunnerPy`.
 - Mensagens de "runner.py não encontrado" indicam o que configurar (setting/Options ou `CODE_GUARDIAN_PATH`).
 
+#### Extensão Visual Studio — build do `.vsix`
+- **Build Release volta a gerar `release/CodeGuardian.VS.vsix` direto pelo MSBuild** (antes falhava com `VSSDK1025: ... CodeGuardian.VS.pkgdef` não encontrado). Causa: com `<Project Sdk="Microsoft.NET.Sdk">`, o import de `Microsoft.VsSDK.targets` no corpo do projeto era avaliado antes do `Microsoft.Common.CurrentVersion.targets`, que sobrescrevia `PrepareForRunDependsOn` e descartava `GeneratePkgDef`. O `.csproj` passa a importar `Sdk.props`/`Sdk.targets` explicitamente, com o VSSDK depois do `Sdk.targets`. O `.vsix` gerado inclui também os scripts Python em `scripts/`, que o empacotamento manual do `build-release.ps1` não incluía.
+
 ---
 
 ## [1.0.11] - 2026-09-12
