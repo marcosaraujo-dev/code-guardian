@@ -731,9 +731,14 @@ Com isso, nenhuma das 500+ propriedades do modelo dispara `PUBLIC_SETTER_ENTITY`
 
 ### "runner.py não encontrado"
 
-1. Verifique se a pasta `code_guardian/` existe na raiz do repositório
-2. Confirme que `runner.py` está dentro da pasta
-3. Se necessário, configure o caminho manualmente em **Tools → Options → Code Guardian → Runner Script Path**
+O runner.py é procurado nesta ordem (mesma regra na extensão do VS e do VS Code):
+
+1. Caminho configurado — **Tools → Options → Code Guardian → Runner Script Path** (VS) ou setting `codeguardian.runnerScriptPath` (VS Code)
+2. Variável de ambiente `CODE_GUARDIAN_PATH` apontando para a pasta `code_guardian/` (a mesma usada pelo MCP `cygnus-code-guardian` do harness)
+3. Pasta `code_guardian/` com `runner.py`, subindo a árvore a partir do arquivo/solution aberto
+4. Apenas no VS: scripts bundlados em `%LOCALAPPDATA%\CodeGuardian\scripts\`
+
+Se o código do Code Guardian está num clone separado do projeto analisado, use a opção 1 ou 2. Variável criada com `setx` só é vista por processos iniciados depois — feche **todas** as janelas do VS/VS Code antes de testar.
 
 ### "Python não encontrado"
 

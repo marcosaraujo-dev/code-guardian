@@ -5,6 +5,18 @@ Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/).
 
 ---
 
+## [1.0.12] - 2026-09-25
+
+### Alterado
+
+#### Extensões VS Code (1.0.9) e Visual Studio (1.0.11) — localização do `runner.py`
+- **Variável de ambiente `CODE_GUARDIAN_PATH` passa a ser lida pelas duas extensões** (mesma variável do MCP `cygnus-code-guardian` do harness, apontando para a pasta `code_guardian/`). Antes, com o Code Guardian clonado fora do projeto analisado e a setting de caminho vazia, a extensão falhava com "runner.py não encontrado. Hooks não instalados." mesmo com a variável configurada.
+- Ordem de resolução unificada nas duas extensões: caminho configurado → `CODE_GUARDIAN_PATH` → `code_guardian/runner.py` subindo a árvore a partir do projeto → (só VS) scripts bundlados em `%LOCALAPPDATA%\CodeGuardian\scripts\`.
+- Extensão VS: a busca estava duplicada em `DependencyChecker` e `GuardianAnalysisService`; agora ambos usam `PythonLocator.LocalizarRunnerPy`.
+- Mensagens de "runner.py não encontrado" indicam o que configurar (setting/Options ou `CODE_GUARDIAN_PATH`).
+
+---
+
 ## [1.0.11] - 2026-09-12
 
 ### Alterado

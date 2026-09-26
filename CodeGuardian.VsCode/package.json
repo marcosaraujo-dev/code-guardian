@@ -2,7 +2,7 @@
   "name": "cygnusforge-codeguardian",
   "displayName": "Code Guardian by CygnusForge",
   "description": "Automated code review for C# — security, quality metrics, AI analysis and risk score.",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "publisher": "MarcosAraujo",
   "icon": "media/icon.png",
   "repository": {

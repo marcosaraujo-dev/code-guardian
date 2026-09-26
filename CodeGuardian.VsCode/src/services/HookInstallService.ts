@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { findGitRoot, findRunnerScript } from '../utils/PythonLocator';
+import { findGitRoot, findRunnerScript, RUNNER_NAO_ENCONTRADO_DICA } from '../utils/PythonLocator';
 import { loadSettings } from '../models/GuardianSettings';
 
 const GUARDIAN_MARKER = '# guardian-managed';
@@ -32,7 +32,9 @@ export class HookInstallService {
       const runnerPath = findRunnerScript(workspaceDir, settings.runnerScriptPath);
 
       if (!runnerPath) {
-        vscode.window.showErrorMessage('Code Guardian: runner.py não encontrado. Hooks não instalados.');
+        vscode.window.showErrorMessage(
+          `Code Guardian: runner.py não encontrado. Hooks não instalados. ${RUNNER_NAO_ENCONTRADO_DICA}`
+        );
         return;
       }
 
