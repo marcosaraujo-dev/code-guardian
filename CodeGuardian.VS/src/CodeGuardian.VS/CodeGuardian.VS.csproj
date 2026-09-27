@@ -1,4 +1,10 @@
-<Project Sdk="Microsoft.NET.Sdk">
+<Project>
+  <!-- Imports explícitos do SDK: o Microsoft.VsSDK.targets precisa vir DEPOIS do Sdk.targets.
+       Com <Project Sdk="...">, o import do VSSDK no corpo era avaliado antes do
+       Microsoft.Common.CurrentVersion.targets, que sobrescrevia PrepareForRunDependsOn e
+       descartava GeneratePkgDef — o .pkgdef nunca era gerado e CreateVsixContainer falhava (VSSDK1025). -->
+  <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
+
   <PropertyGroup>
     <TargetFramework>net472</TargetFramework>
     <OutputType>Library</OutputType>
@@ -122,6 +128,8 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
+
+  <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
 
   <!-- Importa os targets do VSSDK que definem CreateVsixContainer, GeneratePkgDef, etc.
        Necessário em projetos SDK-style pois o NuGet package não faz este import automaticamente. -->

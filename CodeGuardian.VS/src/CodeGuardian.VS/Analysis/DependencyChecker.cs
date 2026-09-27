@@ -17,7 +17,7 @@ namespace CodeGuardian.VS.Analysis
             var settings = ObterConfiguracoes();
 
             var (pythonOk, pythonVersion) = await VerificarPythonAsync(settings.PythonExecutable);
-            var runnerPath = LocalizarRunnerPy(settings, solutionDir);
+            var runnerPath = PythonLocator.LocalizarRunnerPy(settings.RunnerScriptPath, solutionDir);
 
             return new DependencyStatus
             {
@@ -61,34 +61,6 @@ namespace CodeGuardian.VS.Analysis
             }
 
             return (false, null);
-        }
-
-        private static string? LocalizarRunnerPy(CodeGuardianSettings settings, string? solutionDir)
-        {
-            if (!string.IsNullOrWhiteSpace(settings.RunnerScriptPath) && File.Exists(settings.RunnerScriptPath))
-                return settings.RunnerScriptPath;
-
-            // Preferir scripts do projeto (sempre mais atualizados que os bundlados)
-            if (!string.IsNullOrEmpty(solutionDir))
-            {
-                var diretorio = Directory.Exists(solutionDir) ? solutionDir : Path.GetDirectoryName(solutionDir);
-
-                while (!string.IsNullOrEmpty(diretorio))
-                {
-                    var candidato = Path.Combine(diretorio, "code_guardian", "runner.py");
-                    if (File.Exists(candidato)) return candidato;
-
-                    var pai = Path.GetDirectoryName(diretorio);
-                    if (pai == diretorio) break;
-                    diretorio = pai;
-                }
-            }
-
-            // Fallback: scripts bundlados (quando o projeto não contém code_guardian/)
-            if (File.Exists(PythonLocator.BundledRunnerPath))
-                return PythonLocator.BundledRunnerPath;
-
-            return null;
         }
 
         private static CodeGuardianSettings ObterConfiguracoes()

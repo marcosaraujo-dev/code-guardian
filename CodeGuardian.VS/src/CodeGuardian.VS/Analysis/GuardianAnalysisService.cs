@@ -138,11 +138,12 @@ namespace CodeGuardian.VS.Analysis
             try
             {
                 var configuracoes = ObterConfiguracoes();
-                var runnerPath = LocalizarRunnerPy(filePath, configuracoes);
+                var runnerPath = PythonLocator.LocalizarRunnerPy(configuracoes.RunnerScriptPath, filePath);
 
                 if (runnerPath == null)
                 {
-                    const string msgRunner = "runner.py não encontrado. Configure o caminho em Tools > Options > Code Guardian.";
+                    const string msgRunner = "runner.py não encontrado. Configure o caminho em Tools > Options > Code Guardian " +
+                        "ou a variável de ambiente CODE_GUARDIAN_PATH (pasta code_guardian/).";
                     await LogarErroAsync(msgRunner);
                     NotificarFalha(AnalysisErrorType.RunnerNotFound, msgRunner);
                     return;
@@ -269,40 +270,6 @@ namespace CodeGuardian.VS.Analysis
             }
         }
 
-        /// <summary>
-        /// Descobre o caminho do runner.py subindo a árvore de diretórios.
-        /// Usa o campo RunnerScriptPath de Settings como fallback.
-        /// </summary>
-        private string? LocalizarRunnerPy(string pontoDepartida, CodeGuardianSettings cfg)
-        {
-            // Override configurado pelo usuário
-            if (!string.IsNullOrWhiteSpace(cfg.RunnerScriptPath) && File.Exists(cfg.RunnerScriptPath))
-                return cfg.RunnerScriptPath;
-
-            // Preferir scripts do projeto (sempre mais atualizados que os bundlados)
-            var diretorio = File.Exists(pontoDepartida)
-                ? Path.GetDirectoryName(pontoDepartida)
-                : pontoDepartida;
-
-            while (!string.IsNullOrEmpty(diretorio))
-            {
-                var candidato = Path.Combine(diretorio, "code_guardian", "runner.py");
-                if (File.Exists(candidato))
-                    return candidato;
-
-                var pai = Path.GetDirectoryName(diretorio);
-                if (pai == diretorio)
-                    break;
-
-                diretorio = pai;
-            }
-
-            // Fallback: scripts bundlados (quando o projeto não contém code_guardian/)
-            if (File.Exists(PythonLocator.BundledRunnerPath))
-                return PythonLocator.BundledRunnerPath;
-
-            return null;
-        }
 
         /// <summary>
         /// Encontra a raiz do repositório git subindo a árvore de diretórios.
@@ -349,7 +316,7 @@ namespace CodeGuardian.VS.Analysis
         private async Task<GuardianResult?> ExecutarAnaliseSimplesAsync(string filePath, CancellationToken ct)
         {
             var cfg        = ObterConfiguracoes();
-            var runnerPath = LocalizarRunnerPy(filePath, cfg);
+            var runnerPath = PythonLocator.LocalizarRunnerPy(cfg.RunnerScriptPath, filePath);
             if (runnerPath == null)
                 return null;
 

@@ -3,7 +3,7 @@ import * as path from 'path';
 import { GuardianResult } from '../models/GuardianResult';
 import { loadSettings } from '../models/GuardianSettings';
 import { PythonProcessRunner, PythonNotFoundException, GuardianScriptException } from './PythonProcessRunner';
-import { findRunnerScript, findGitRoot } from '../utils/PythonLocator';
+import { findRunnerScript, findGitRoot, RUNNER_NAO_ENCONTRADO_DICA } from '../utils/PythonLocator';
 
 export class GuardianAnalysisService {
   readonly onCompleted = new vscode.EventEmitter<GuardianResult>();
@@ -51,7 +51,7 @@ export class GuardianAnalysisService {
     const runnerPath = findRunnerScript(workingDir, settings.runnerScriptPath);
 
     if (!runnerPath) {
-      const msg = 'runner.py não encontrado. Certifique-se de que code_guardian/ está na raiz do projeto.';
+      const msg = `runner.py não encontrado. ${RUNNER_NAO_ENCONTRADO_DICA}`;
       this.onFailed.fire(msg);
       vscode.window.showErrorMessage(`Code Guardian: ${msg}`);
       return;
