@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Code Guardian Report</title>
+  <style>
+    * { box-sizing:border-box;margin:0;padding:0 }
+    body { font-family:'Segoe UI',system-ui,sans-serif;background:#F5F5F5;
+           color:#495057;padding:30px }
+    .container { max-width:1100px;margin:0 auto }
+    .card { background:#FFFFFF;border:1px solid #DEE2E6;border-radius:8px;
+             padding:16px;margin-bottom:24px;box-shadow:0 1px 3px rgba(0,0,0,.05) }
+    .page-title { font-size:24px;font-weight:600;color:#495057;margin-bottom:4px }
+    .subtitle { font-size:13px;color:#6C757D;margin-bottom:24px }
+    a { color:#184194 } a:hover { color:#0F2D6B }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <h1 class="page-title">&#128737; Code Guardian Report</h1>
+  <p class="subtitle">
+    Gerado em 12/09/2026 20:24:06 &nbsp;&bull;&nbsp;
+    1 arquivo(s) analisado(s) &nbsp;&bull;&nbsp;
+    0.2s
+  </p>
+
+  <!-- Risk Score + Resumo -->
+  <div style="display:flex;gap:20px;flex-wrap:wrap;align-items:stretch;margin-bottom:24px">
+
+    <!-- Card Risk Score -->
+    <div style="background:#DC3545;border:1px solid #C82333;border-radius:8px;
+                padding:20px 24px;min-width:220px;position:relative">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between">
+        <div>
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;
+                      letter-spacing:.08em;color:#FFFFFF;opacity:.75;margin-bottom:6px">
+            Risk Score
+          </div>
+          <div style="font-size:52px;font-weight:700;line-height:1;color:#FFFFFF">75</div>
+          <div style="font-size:14px;font-weight:600;color:#FFFFFF;margin-top:6px">Risco Cr&#237;tico</div>
+        </div>
+        <!-- Ícone de informação -->
+        <button onclick="toggleRiskInfo()" title="Como &#233; calculado?"
+          style="background:rgba(0,0,0,.1);border:none;border-radius:50%;width:28px;height:28px;
+                 cursor:pointer;font-size:14px;color:#FFFFFF;font-weight:700;
+                 display:flex;align-items:center;justify-content:center;flex-shrink:0;
+                 margin-left:8px;opacity:.8">&#9432;</button>
+      </div>
+    </div>
+
+    <!-- Tabela de severidades -->
+    <div class="card" style="flex:1;min-width:200px;padding:0;overflow:hidden">
+      <table style="width:100%;border-collapse:collapse">
+        <thead><tr style="background:#F8F9FA;border-bottom:2px solid #DEE2E6">
+          <th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:600;
+                     text-transform:uppercase;color:#6C757D;letter-spacing:.05em">Severidade</th>
+          <th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:600;
+                     text-transform:uppercase;color:#6C757D;letter-spacing:.05em">Total</th>
+        </tr></thead>
+        <tbody><tr style="border-bottom:1px solid #E9ECEF"><td style="padding:8px 16px"><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#DC3545;margin-right:6px;vertical-align:middle"></span><span style="font-size:13px;color:#495057">Critical</span></td><td style="padding:8px 16px;font-weight:700;color:#DC3545;font-size:16px">3</td></tr><tr style="border-bottom:1px solid #E9ECEF"><td style="padding:8px 16px"><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#FD7E14;margin-right:6px;vertical-align:middle"></span><span style="font-size:13px;color:#495057">Error</span></td><td style="padding:8px 16px;font-weight:700;color:#FD7E14;font-size:16px">0</td></tr><tr style="border-bottom:1px solid #E9ECEF"><td style="padding:8px 16px"><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#FFC107;margin-right:6px;vertical-align:middle"></span><span style="font-size:13px;color:#495057">Warning</span></td><td style="padding:8px 16px;font-weight:700;color:#856404;font-size:16px">0</td></tr><tr><td style="padding:8px 16px"><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#17A2B8;margin-right:6px;vertical-align:middle"></span><span style="font-size:13px;color:#495057">Info</span></td><td style="padding:8px 16px;font-weight:700;color:#17A2B8;font-size:16px">0</td></tr></tbody>
+      </table>
+    </div>
+
+  </div>
+
+  <!-- Plano de Correção -->
+  <div style="margin-bottom:24px;border:1px solid #DEE2E6;border-radius:8px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.05)"><div style="background:#184194;color:#FFFFFF;padding:10px 16px;font-size:14px;font-weight:600">&#128203; Plano de Corre&#231;&#227;o</div><div style="background:#FFFFFF;padding:16px"><p style="margin:0 0 12px;font-size:13px;color:#6C757D">3 corre&#231;&#245;es &bull; 3 bloqueiam merge &bull; 0 melhorias recomendadas</p>
+<table style="width:100%;border-collapse:collapse"><thead><tr style="background:#F8F9FA;border-bottom:2px solid #DEE2E6"><th style="padding:8px 12px;text-align:left;font-size:11px;font-weight:600;text-transform:uppercase;color:#6C757D;width:36px">#</th><th style="padding:8px 12px;text-align:left;font-size:11px;font-weight:600;text-transform:uppercase;color:#6C757D">Arquivo</th><th style="padding:8px 12px;text-align:left;font-size:11px;font-weight:600;text-transform:uppercase;color:#6C757D">Severidade</th><th style="padding:8px 12px;text-align:left;font-size:11px;font-weight:600;text-transform:uppercase;color:#6C757D">Issue</th><th style="padding:8px 12px;text-align:left;font-size:11px;font-weight:600;text-transform:uppercase;color:#6C757D">A&#231;&#227;o</th></tr></thead><tbody>
+<tr style="border-bottom:1px solid #E9ECEF;background:#FFF5F5"><td style="padding:8px 12px;font-size:12px;color:#6C757D;text-align:center">1</td><td style="padding:8px 12px;font-family:Consolas,monospace;font-size:12px">secrets.cs:6</td><td style="padding:8px 12px"><span style="display:inline-block;padding:3px 8px;border-radius:10px;font-size:11px;font-weight:600;background:#F8D7DA;color:#721C24">Critical</span></td><td style="padding:8px 12px;font-size:12px;font-weight:600;color:#495057">Secrets Hardcoded</td><td style="padding:8px 12px;font-size:12px;color:#495057">Possível senha hardcoded. Use variáveis de ambiente ou Secret Manager.</td></tr>
+<tr style="border-bottom:1px solid #E9ECEF;background:#FFF5F5"><td style="padding:8px 12px;font-size:12px;color:#6C757D;text-align:center">2</td><td style="padding:8px 12px;font-family:Consolas,monospace;font-size:12px">secrets.cs:9</td><td style="padding:8px 12px"><span style="display:inline-block;padding:3px 8px;border-radius:10px;font-size:11px;font-weight:600;background:#F8D7DA;color:#721C24">Critical</span></td><td style="padding:8px 12px;font-size:12px;font-weight:600;color:#495057">Secrets Hardcoded</td><td style="padding:8px 12px;font-size:12px;color:#495057">Possível API key/token hardcoded. Use variáveis de ambiente ou Secret Manager.</td></tr>
+<tr style="border-bottom:1px solid #E9ECEF;background:#FFF5F5"><td style="padding:8px 12px;font-size:12px;color:#6C757D;text-align:center">3</td><td style="padding:8px 12px;font-family:Consolas,monospace;font-size:12px">secrets.cs:12</td><td style="padding:8px 12px"><span style="display:inline-block;padding:3px 8px;border-radius:10px;font-size:11px;font-weight:600;background:#F8D7DA;color:#721C24">Critical</span></td><td style="padding:8px 12px;font-size:12px;font-weight:600;color:#495057">Secrets Hardcoded</td><td style="padding:8px 12px;font-size:12px;color:#495057">Possível API key/token hardcoded. Use variáveis de ambiente ou Secret Manager.</td></tr>
+</tbody></table>
+<p style="margin:12px 0 0;font-size:12px;color:#6C757D;font-style:italic">Ap&#243;s corrigir, revalide: <code style="background:#F8F9FA;padding:2px 6px;border-radius:3px;font-size:11px">python code_guardian/runner.py --staged --rules-only</code></p>
+</div></div>
+
+  <!-- Seções por arquivo -->
+  <div style="margin-bottom:24px;border:1px solid #DEE2E6;border-radius:8px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.05)"><div style="background:#184194;color:#FFFFFF;padding:10px 16px;font-family:Consolas,'Courier New',monospace;font-size:13px;word-break:break-all">&#128193; C:/Repos/code-guardian/code_guardian/tests/fixtures/secrets.cs</div><div style="background:#FFFFFF;padding:16px"><p style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#6C757D;margin:0 0 8px">Issues Detectadas</p><table style="width:100%;border-collapse:collapse;margin-bottom:16px"><thead><tr style="background:#F8F9FA;border-bottom:2px solid #DEE2E6"><th style="padding:8px 12px;text-align:left;font-size:11px;font-weight:600;text-transform:uppercase;color:#6C757D">Linha</th><th style="padding:8px 12px;text-align:left;font-size:11px;font-weight:600;text-transform:uppercase;color:#6C757D">Severidade</th><th style="padding:8px 12px;text-align:left;font-size:11px;font-weight:600;text-transform:uppercase;color:#6C757D">Categoria</th><th style="padding:8px 12px;text-align:left;font-size:11px;font-weight:600;text-transform:uppercase;color:#6C757D">Mensagem</th></tr></thead><tbody><tr style="border-bottom:1px solid #E9ECEF"><td style="padding:8px 12px;color:#6C757D;font-size:12px;white-space:nowrap">6</td><td style="padding:8px 12px"><span style="display:inline-block;padding:3px 8px;border-radius:10px;font-size:11px;font-weight:600;background:#F8D7DA;color:#721C24">Critical</span></td><td style="padding:8px 12px;font-size:12px;color:#495057">Secrets Hardcoded</td><td style="padding:8px 12px;font-size:13px"><span style="font-size:10px;color:#6C757D;margin-right:4px">[rule_engine]</span>Possível senha hardcoded. Use variáveis de ambiente ou Secret Manager.</td></tr><tr style="border-bottom:1px solid #E9ECEF"><td style="padding:8px 12px;color:#6C757D;font-size:12px;white-space:nowrap">9</td><td style="padding:8px 12px"><span style="display:inline-block;padding:3px 8px;border-radius:10px;font-size:11px;font-weight:600;background:#F8D7DA;color:#721C24">Critical</span></td><td style="padding:8px 12px;font-size:12px;color:#495057">Secrets Hardcoded</td><td style="padding:8px 12px;font-size:13px"><span style="font-size:10px;color:#6C757D;margin-right:4px">[rule_engine]</span>Possível API key/token hardcoded. Use variáveis de ambiente ou Secret Manager.</td></tr><tr style="border-bottom:1px solid #E9ECEF"><td style="padding:8px 12px;color:#6C757D;font-size:12px;white-space:nowrap">12</td><td style="padding:8px 12px"><span style="display:inline-block;padding:3px 8px;border-radius:10px;font-size:11px;font-weight:600;background:#F8D7DA;color:#721C24">Critical</span></td><td style="padding:8px 12px;font-size:12px;color:#495057">Secrets Hardcoded</td><td style="padding:8px 12px;font-size:13px"><span style="font-size:10px;color:#6C757D;margin-right:4px">[rule_engine]</span>Possível API key/token hardcoded. Use variáveis de ambiente ou Secret Manager.</td></tr></tbody></table><p style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#6C757D;margin:16px 0 8px">M&#233;tricas</p><table style="width:100%;border-collapse:collapse;margin-bottom:8px"><thead><tr style="background:#F8F9FA;border-bottom:2px solid #DEE2E6"><th style="padding:7px 12px;text-align:left;font-size:11px;font-weight:600;text-transform:uppercase;color:#6C757D">M&#233;trica</th><th style="padding:7px 12px;text-align:left;font-size:11px;font-weight:600;text-transform:uppercase;color:#6C757D">Valor</th><th style="padding:7px 12px;text-align:left;font-size:11px;font-weight:600;text-transform:uppercase;color:#6C757D">Limite</th></tr></thead><tbody><tr style="border-bottom:1px solid #E9ECEF"><td style="padding:7px 12px;font-size:13px">Linhas totais</td><td style="padding:7px 12px"><span style="color:#155724;font-weight:500">19 &#10003;</span></td><td style="padding:7px 12px;font-size:11px;color:#ADB5BD">recomendado &lt; 300</td></tr><tr style="border-bottom:1px solid #E9ECEF"><td style="padding:7px 12px;font-size:13px">Maior m&#233;todo (linhas)</td><td style="padding:7px 12px"><span style="color:#155724;font-weight:500">4 &#10003;</span></td><td style="padding:7px 12px;font-size:11px;color:#ADB5BD">recomendado &lt; 30</td></tr><tr style="border-bottom:1px solid #E9ECEF"><td style="padding:7px 12px;font-size:13px">Nesting m&#225;ximo</td><td style="padding:7px 12px"><span style="color:#856404;font-weight:600">3</span></td><td style="padding:7px 12px;font-size:11px;color:#ADB5BD">recomendado &lt; 3</td></tr><tr><td style="padding:7px 12px;font-size:13px">Depend&#234;ncias (construtor)</td><td style="padding:7px 12px"><span style="color:#155724;font-weight:500">0 &#10003;</span></td><td style="padding:7px 12px;font-size:11px;color:#ADB5BD">recomendado &lt; 5</td></tr></tbody></table></div></div>
+
+  <footer style="text-align:center;color:#ADB5BD;font-size:12px;margin-top:32px;
+                 padding-top:16px;border-top:1px solid #DEE2E6">
+    Code Guardian &nbsp;&bull;&nbsp; rule_engine + metrics + AI &nbsp;&bull;&nbsp; 12/09/2026 20:24:06
+  </footer>
+
+</div>
+
+
+<div id="riskModal" onclick="if(event.target===this)this.style.display='none'"
+  style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;
+         background:rgba(0,0,0,.45);z-index:1000;align-items:center;justify-content:center">
+  <div style="background:#fff;border-radius:8px;padding:28px 32px;max-width:500px;width:90%;
+              box-shadow:0 8px 32px rgba(0,0,0,.18);position:relative">
+    <button onclick="document.getElementById('riskModal').style.display='none'"
+      style="position:absolute;top:12px;right:16px;background:none;border:none;
+             font-size:20px;cursor:pointer;color:#6C757D;line-height:1">&#215;</button>
+    <h3 style="font-size:16px;font-weight:600;color:#184194;margin-bottom:16px">
+      &#128737; Como o Risk Score &#233; calculado</h3>
+    <p style="font-size:13px;color:#495057;margin-bottom:12px">
+      O Risk Score &#233; a soma ponderada de todas as issues encontradas:</p>
+    <table style="width:100%;border-collapse:collapse;font-size:13px;margin-bottom:16px">
+      <thead><tr style="background:#F8F9FA;border-bottom:2px solid #DEE2E6">
+        <th style="padding:8px 12px;text-align:left;color:#6C757D;font-size:11px;text-transform:uppercase">Severidade</th>
+        <th style="padding:8px 12px;text-align:center;color:#6C757D;font-size:11px;text-transform:uppercase">Peso</th>
+        <th style="padding:8px 12px;text-align:center;color:#6C757D;font-size:11px;text-transform:uppercase">Qtd</th>
+        <th style="padding:8px 12px;text-align:right;color:#6C757D;font-size:11px;text-transform:uppercase">Pontos</th>
+      </tr></thead>
+      <tbody>
+        <tr style="border-bottom:1px solid #E9ECEF">
+          <td style="padding:8px 12px"><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#DC3545;margin-right:6px;vertical-align:middle"></span>Critical</td>
+          <td style="padding:8px 12px;text-align:center;font-weight:600">&#215; 25</td>
+          <td style="padding:8px 12px;text-align:center">3</td>
+          <td style="padding:8px 12px;text-align:right;font-weight:600;color:#DC3545">75</td>
+        </tr>
+        <tr style="border-bottom:1px solid #E9ECEF">
+          <td style="padding:8px 12px"><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#FD7E14;margin-right:6px;vertical-align:middle"></span>Error</td>
+          <td style="padding:8px 12px;text-align:center;font-weight:600">&#215; 10</td>
+          <td style="padding:8px 12px;text-align:center">0</td>
+          <td style="padding:8px 12px;text-align:right;font-weight:600;color:#FD7E14">0</td>
+        </tr>
+        <tr style="border-bottom:1px solid #E9ECEF">
+          <td style="padding:8px 12px"><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#FFC107;margin-right:6px;vertical-align:middle"></span>Warning</td>
+          <td style="padding:8px 12px;text-align:center;font-weight:600">&#215; 3</td>
+          <td style="padding:8px 12px;text-align:center">0</td>
+          <td style="padding:8px 12px;text-align:right;font-weight:600;color:#856404">0</td>
+        </tr>
+        <tr>
+          <td style="padding:8px 12px"><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#17A2B8;margin-right:6px;vertical-align:middle"></span>Info</td>
+          <td style="padding:8px 12px;text-align:center;font-weight:600">&#215; 1</td>
+          <td style="padding:8px 12px;text-align:center">0</td>
+          <td style="padding:8px 12px;text-align:right;font-weight:600;color:#17A2B8">0</td>
+        </tr>
+      </tbody>
+      <tfoot><tr style="background:#F8F9FA;border-top:2px solid #DEE2E6">
+        <td colspan="3" style="padding:8px 12px;font-weight:700;font-size:13px">Total</td>
+        <td style="padding:8px 12px;text-align:right;font-weight:700;font-size:15px">75</td>
+      </tr></tfoot>
+    </table>
+    <p style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;
+              color:#6C757D;margin-bottom:8px">Faixas de sa&#250;de do c&#243;digo</p>
+    <table style="width:100%;border-collapse:collapse;font-size:13px">
+      <tr style="border-bottom:1px solid #E9ECEF">
+        <td style="padding:6px 10px"><span style="background:#D4EDDA;color:#155724;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600">0 &ndash; 10</span></td>
+        <td style="padding:6px 10px;color:#155724;font-weight:500">&#10003; Baixo Risco — c&#243;digo saud&#225;vel</td>
+      </tr>
+      <tr style="border-bottom:1px solid #E9ECEF">
+        <td style="padding:6px 10px"><span style="background:#FFF3CD;color:#856404;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600">11 &ndash; 30</span></td>
+        <td style="padding:6px 10px;color:#856404;font-weight:500">&#9888; Risco Moderado — revisar antes do merge</td>
+      </tr>
+      <tr style="border-bottom:1px solid #E9ECEF">
+        <td style="padding:6px 10px"><span style="background:#F8D7DA;color:#721C24;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600">31 &ndash; 60</span></td>
+        <td style="padding:6px 10px;color:#721C24;font-weight:500">&#128308; Alto Risco — corre&#231;&#245;es obrigat&#243;rias</td>
+      </tr>
+      <tr>
+        <td style="padding:6px 10px"><span style="background:#DC3545;color:#fff;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600">&gt; 60</span></td>
+        <td style="padding:6px 10px;color:#DC3545;font-weight:500">&#128683; Risco Cr&#237;tico — bloqueia o deploy</td>
+      </tr>
+    </table>
+    <p style="font-size:11px;color:#ADB5BD;margin-top:14px">
+      F&#243;rmula: 3 critical &times; 25 = <strong>75</strong></p>
+  </div>
+</div>
+<script>
+function toggleRiskInfo() {
+  var m = document.getElementById('riskModal');
+  m.style.display = m.style.display === 'flex' ? 'none' : 'flex';
+}
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') document.getElementById('riskModal').style.display = 'none';
+});
+</script>
+</body>
+</html>

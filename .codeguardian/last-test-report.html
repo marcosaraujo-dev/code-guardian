@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Code Guardian — Testes</title>
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+         background:#f1f3f5; margin:0; padding:24px; color:#212529; }
+  .container { max-width:900px; margin:0 auto; }
+  h1 { font-size:1.6rem; margin-bottom:4px; }
+  .subtitle { color:#6c757d; font-size:.9rem; margin-bottom:20px; }
+  .card { background:#fff; border-radius:8px; box-shadow:0 1px 4px rgba(0,0,0,.1);
+           padding:20px; margin-bottom:20px; }
+  .score-card { background:#198754; color:#fff; border-radius:8px;
+                 padding:20px 28px; display:inline-block; margin-bottom:20px; }
+  .score-card .num { font-size:2.8rem; font-weight:700; line-height:1; }
+  .score-card .lbl { font-size:1rem; margin-top:4px; }
+  table { width:100%; border-collapse:collapse; font-size:.88rem; }
+  th, td { padding:7px 12px; border-bottom:1px solid #dee2e6; text-align:left; vertical-align:top; }
+  th { background:#f8f9fa; font-weight:600; }
+  tr:last-child td { border-bottom:none; }
+  h2 { font-size:1rem; font-weight:700; margin:0 0 12px; color:#495057; }
+  footer { text-align:center; color:#adb5bd; font-size:.8rem; margin-top:28px; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>🛡️ Code Guardian — Suite de Testes</h1>
+  <p class="subtitle">Executado em 12/09/2026 20:24:07 &nbsp;|&nbsp; 37.6s</p>
+
+  <div style="display:flex;gap:20px;flex-wrap:wrap;align-items:flex-start;margin-bottom:8px">
+    <div class="score-card">
+      <div class="num">83/83</div>
+      <div class="lbl">✅ Todos passaram &nbsp;(100%)</div>
+    </div>
+    <div class="card" style="flex:1;min-width:200px;padding:16px 20px">
+      <table>
+        <tr><th>Status</th><th>Qtd</th></tr>
+        <tr><td>✅ PASS</td><td style="font-weight:700;color:#198754">83</td></tr>
+        <tr><td>❌ FAIL</td><td style="font-weight:700;color:#dc3545">0</td></tr>
+        <tr><td>Total</td><td style="font-weight:700">83</td></tr>
+      </table>
+    </div>
+  </div>
+
+  
+
+  <div class="card">
+    <h2>✅ Casos que passaram (83)</h2>
+    <table>
+      <thead><tr><th style="width:120px">ID</th><th>Descrição</th><th style="width:70px">Status</th></tr></thead>
+      <tbody><tr><td style="font-family:monospace;font-size:.85rem">TC-RE-001</td><td>✅ SQL Injection por concatenacao (+)</td><td><span style="color:#198754;font-weight:600">PASS</span></td></tr>
+<tr><td style="font-family:monospace;font-size:.85rem">TC-RE-002</td><td>✅ Exit code 1 quando ha critical</td><td><span style="color:#198754;font-weight:600">PASS</span></td></tr>
+<tr><td style="font-family:monospace;font-size:.85rem">TC-RE-003</td><td>✅ Detecta .Result (TASK_RESULT_DEADLOCK)</td><td><span style="color:#198754;font-weight:600">PASS</span></td></tr>
+<tr><td style="font-family:monospace;font-size:.85rem">TC-RE-004</td><td>✅ Detecta .Wait() (TASK_WAIT_DEADLOCK)</td><td><span style="color:#198754;font-weight:600">PASS</span></td></tr>
+<tr><td style="font-family:monospace;font-size:.85rem">TC-RE-005</td><td>✅ Detecta async void em metodo comum</td><td><span style="color:#198754;font-weight:600">PASS</span></td></tr>
+<tr><td style="font-family:monospace;font-size:.85rem">TC-RE-006</td><td>✅ async void em event handler nao dispara (falso positivo)</td><td><span style="color:#198754;font-weight:600">PASS</span></td></tr>
+<tr><td style="font-family:monospace;font-size:.85rem">TC-RE-007</td><td>✅ Detecta senha hardcoded (HARDCODED_PASSWORD)</td><td><span style="color:#198754;font-weight:600">PASS</span></td></tr>
+<tr><td style="font-family:monospace;font-size:.85rem">TC-RE-008</td><td>✅ Detecta API key hardcoded (HARDCODED_API_KEY)</td><td><span style="color:#198754;font-weight:600">PASS</span></td></tr>
+<tr><td style="font-family:monospace;font-size:.85rem">TC-RE-009</td><td>✅ Detecta catch {} vazio</td><td><span style="color:#198754;font-weight:600">PASS</span></td></tr>
+<tr><td style="font-family:monospace;font-size:.85rem">TC-RE-010</td><td>✅ Detecta catch(Exception ex) {} vazio</td><td><span style="color:#198754;font-weight:600">PASS</span></td></tr>
+<tr><td style="font-family:monospace;font-size:.85rem">TC-RE-011</td><td>✅ Detecta Console.WriteLine (warning)</td><td><span style="color:#198754;font-weight:600">PASS</span></td></tr>
+<tr><td style="font-family:monospace;font-size:.85rem">TC-RE-012</td><td>✅ Detecta Console.Write (warning)</td><td><span style="color:#198754;font-weight:600">PASS</span></td></tr>
+<tr><td style="font-family:monospace;font-size:.85rem">TC-RE-012b</td><td>✅ Console warnings nao causam exit 1</td><td><span style="color:#198754;font-weight:600">PASS</span></td></tr>
+<tr><td style="font-family:monospace;font-size:.85rem">TC-RE-013</td><td>✅ Detecta TODO_COMMENT</td><td><span style="color:#198754;font-weight:600">PASS</span></td></tr>
+<tr><td style="font-family:monospace;font-size:.85rem">TC-RE-014</td><td>✅ Detecta FIXME_COMMENT</td><td><span style="color:#198754;font-weight:600">PASS</span></td></tr>
+<tr><td style="font-family:monospace;font-size:.85rem">TC-RE-015</td><td>✅ Detecta HACK_COMMENT</td><td><span style="color:#198754;font-weight:600">PASS</span></td></tr>
+<tr><td style="font-family:monospace;font-size:.85rem">TC-RE-016</td><td>✅ Detecta new HttpClient() (HTTPCLIENT_NEW)</td><td><span style="color:#198754;font-weight:600">PASS</span></td></tr>
+<tr><td style="font-family:monospace;font-size:.85rem">TC-RE-017</td><td>✅ --severity error filtra TODO/FIXME (info)</td><td><span style="color:#198754;font-weight:600">PASS</span></td></tr>
+<tr><td style="font-family:monospace;font-size:.85rem">TC-RE-018</td><td>✅ --severity critical retorna apenas criticals</td><td><span style="color:#198754;font-weight:600">PASS</span></td></tr>
+<tr><td style="font-family:monospace;font-size:.85rem">TC-RE-019</td><td>✅ --severity warning inclui warnings</td><td><span style="color:#198754;font-weight:600">PASS</span></td></tr>
+<tr><td style="font-family:monospace;font-size:.85rem">TC-RE-020</td><td>✅ Arquivo limpo retorna [] e exit 0</td><td><span style="color:#198754;font-weight:600">PASS</span></td></tr>
+<tr><td style="font-family:monospace;font-size:.85rem">TC-RE-021</td><td>✅ Arquivo inexistente retorna FILE_NOT_FOUND e exit 1</td><td><span style="color:#198754;font-weight:600">PASS</span></td></tr>
+<tr><td style="font-family:monospace;font-size:.85rem">TC-RE-022</td><td>✅ Matches em comentarios nao disparam issues</td><td><span style="color:#198754;font-weight:600">PASS</span></td></tr>
+<tr><td style="font-family:monospace;font-size:.85rem">TC-RE-024</td><td>✅ Formato text mostra icone correto (critical = vermelho)</td><td><span style="color:#198754;font-weight:600">PASS</span></td></tr>
+<tr><td style="font-family:monospace;font-size:.85rem">TC-RE-025</td><td>✅ Formato text mostra L{numero} de linha</td><td><span style="color:#198754;font-weight:600">PASS</span></td></tr>
+<tr><td style="font-family:monospace;font-size:.85rem">TC-RE-026</td><td>✅ Detecta comentario com abertura narrativa ('This function...')</td><td><span style="color:#198754;font-weight:600">PASS</span></td></tr>
+<tr><td style="font-family:monospace;font-size:.85rem">TC-RE-027</td><td>✅ Detecta comentario que parafraseia a linha seguinte (alta sobreposicao)</td><td><span style="color:#198754;font-weight:600">PASS</span></td></tr>
+<tr><td style="font-family:monospace;font-size:.85rem">TC-RE-028</td><td>✅ Comentario com sinal de PORQUE (Workaround:) nao dispara (falso positivo)</td><td><span style="color:#198754;font-weight:600">PASS</span></td></tr>
+<tr><td style="font-family:monospace;font-size:.85rem">TC-RE-029</td><td>✅ NARRATIVE_COMMENT causa exit 1 (severidade error, bloqueia por padrao --fail-on error)</td><td><span style="color:#198754;font-weight:600">PASS</span></td></tr>
+<tr><td style="font-family:monospace;font-size:.85rem">TC-RE-030</td><td>✅ --severity error mantem NARRATIVE_COMMENT (severidade error)</td><td><span style="color:#198754;font-weight:600">PASS</span></td></tr>
+<tr><td style="font-family:monospace;font-size:.85rem">TC-RE-031</td><td>✅ Arquivo limpo (com /// se houver) nao dispara NARRATIVE_COMMENT</td><td><span style="color:#198754;font-weight:600">PASS</span></td></tr>
+<tr><td style="font-family:monospace;font-size:.85rem">TC-ME-001</td><td>✅ Arquivo limpo: issues vazio e exit 0</td><td><span style="color:#198754;font-weight:600">PASS</span></td></tr>
+<tr><td style="font-family:monospace;font-size:.85rem">TC-ME-002</td><td>✅ Metodo com > 30 linhas dispara issue Metodo Longo</td><td><span style="color:#198754;font-weight:600">PASS</span></td></tr>
+<tr><td style="font-family:monospace;font-size:.85rem">TC-ME-003</td><td>✅ Mensagem menciona nome do metodo (GenerateFullReport)</td><td><span style="color:#198754;font-weight:600">PASS</span></td></tr>
+<tr><td style="font-family:monospace;font-size:.85rem">TC-ME-004</td><td>✅ Nesting > 5 dispara issue Deep Nesting</td><td><span style="color:#198754;font-weight:600">PASS</span></td></tr>
+<tr><td style="font-family:monospace;font-size:.85rem">TC-ME-005</td><td>✅ max_nesting reportado > 5 no JSON</td><td><span style="color:#198754;font-weight:600">PASS</span></td></tr>
+<tr><td style="font-family:monospace;font-size:.85rem">TC-ME-006</td><td>✅ Mais de 5 deps dispara issue God Class</td><td><span style="color:#198754;font-weight:600">PASS</span></td></tr>
+<tr><td style="font-family:monospace;font-size:.85rem">TC-ME-007</td><td>✅ constructor_deps >= 7 no JSON</td><td><span style="color:#198754;font-weight:600">PASS</span></td></tr>
+<tr><td style="font-family:monospace;font-size:.85rem">TC-ME-008</td><td>✅ Mais de 10 metodos publicos gera issue God Class</td><td><span style="color:#198754;font-weight:600">PASS</span></td></tr>
+<tr><td style="font-family:monospace;font-size:.85rem">TC-ME-009</td><td>✅ public_method_count >= 12 reportado no JSON</td><td><span style="color:#198754;font-weight:600">PASS</span></td></tr>
+<tr><td style="font-family:monospace;font-size:.85rem">TC-ME-010</td><td>✅ Formato text mostra sumario legivel</td><td><span style="color:#198754;font-weight:600">PASS</span></td></tr>
+<tr><td style="font-family:monospace;font-size:.85rem">TC-ME-011</td><td>✅ Arquivo limpo exibe mensagem positiva no text</td><td><span style="color:#198754;font-weight:600">PASS</span></td></tr>
+<tr><td style="font-family:monospace;font-size:.85rem">TC-ME-012</td><td>✅ Arquivo inexistente retorna issue e exit 1</td><td><span style="color:#198754;font-weight:600">PASS</span></td></tr>
+<tr><td style="font-family:monospace;font-size:.85rem">TC-ME-015</td><td>✅ Metodos com corpo identico disparam issue de Duplicacao (severidade error)</td><td><span style="color:#198754;font-weight:600">PASS</span></td></tr>
+<tr><td style="font-family:monospace;font-size:.85rem">TC-ME-016</td><td>✅ Mensagem de duplicacao cita os dois metodos envolvidos</td><td><span style="color:#198754;font-weight:600">PASS</span></td></tr>
+<tr><td style="font-family:monospace;font-size:.85rem">TC-ME-017</td><td>✅ Metodo curto e diferente (SumSmall) nao entra na duplicacao (sem falso positivo)</td><td><span style="color:#198754;font-weight:600">PASS</span></td></tr>
+<tr><td style="font-family:monospace;font-size:.85rem">TC-ME-018</td><td>✅ Duplicacao de metodo causa exit 1 (severidade error bloqueia)</td><td><span style="color:#198754;font-weight:600">PASS</span></td></tr>
+<tr><td style="font-family:monospace;font-size:.85rem">TC-ME-019</td><td>✅ body_hash de CalculateOrderTotal e CalculateInvoiceTotal e identico</td><td><span style="color:#198754;font-weight:600">PASS</span></td></tr>
+<tr><td style="font-family:monospace;font-size:.85rem">TC-ME-013</td><td>✅ JSON contem campos obrigatorios (file, total_lines, classes, issues)</td><td><span style="color:#198754;font-weight:600">PASS</span></td></tr>
+<tr><td style="font-family:monospace;font-size:.85rem">TC-ME-014</td><td>✅ Cada classe contem methods, constructor_deps, public_method_count, max_nesting</td><td><span style="color:#198754;font-weight:600">PASS</span></td></tr>
+<tr><td style="font-family:monospace;font-size:.85rem">TC-DP-001..005</td><td>✅ Funcao _should_include filtra corretamente</td><td><span style="color:#198754;font-weight:600">PASS</span></td></tr>
+<tr><td style="font-family:monospace;font-size:.85rem">TC-DP-006</td><td>✅ --staged sem staged retorna [] e exit 0</td><td><span style="color:#198754;font-weight:600">PASS</span></td></tr>
+<tr><td style="font-family:monospace;font-size:.85rem">TC-DP-007</td><td>✅ --staged --files-only sem staged retorna exit 1</td><td><span style="color:#198754;font-weight:600">PASS</span></td></tr>
+<tr><td style="font-family:monospace;font-size:.85rem">TC-DP-008</td><td>✅ Saida JSON e uma lista</td><td><span style="color:#198754;font-weight:600">PASS</span></td></tr>
+<tr><td style="font-family:monospace;font-size:.85rem">TC-DP-009</td><td>✅ Sem argumentos executa sem erro de execucao</td><td><span style="color:#198754;font-weight:600">PASS</span></td></tr>
+<tr><td style="font-family:monospace;font-size:.85rem">TC-DP-010</td><td>✅ Formato text nao explode</td><td><span style="color:#198754;font-weight:600">PASS</span></td></tr>
+<tr><td style="font-family:monospace;font-size:.85rem">TC-DP-011</td><td>✅ --for-ai executa sem excecao</td><td><span style="color:#198754;font-weight:600">PASS</span></td></tr>
+<tr><td style="font-family:monospace;font-size:.85rem">TC-AI-001</td><td>✅ --list-providers lista provedores e exit 0</td><td><span style="color:#198754;font-weight:600">PASS</span></td></tr>
+<tr><td style="font-family:monospace;font-size:.85rem">TC-AI-002</td><td>✅ Arquivo inexistente retorna exit 1</td><td><span style="color:#198754;font-weight:600">PASS</span></td></tr>
+<tr><td style="font-family:monospace;font-size:.85rem">TC-AI-003</td><td>✅ [SEM API] Retorna JSON com campo ai_available</td><td><span style="color:#198754;font-weight:600">PASS</span></td></tr>
+<tr><td style="font-family:monospace;font-size:.85rem">TC-AI-004</td><td>✅ [SEM API] Exit code sempre 0 (mesmo sem IA)</td><td><span style="color:#198754;font-weight:600">PASS</span></td></tr>
+<tr><td style="font-family:monospace;font-size:.85rem">TC-AI-005</td><td>✅ JSON contem file, ai_available, provider, model, analysis</td><td><span style="color:#198754;font-weight:600">PASS</span></td></tr>
+<tr><td style="font-family:monospace;font-size:.85rem">TC-AI-006</td><td>✅ [SEM API] Formato text nao explode</td><td><span style="color:#198754;font-weight:600">PASS</span></td></tr>
+<tr><td style="font-family:monospace;font-size:.85rem">TC-AI-007</td><td>✅ [SEM API] Campo analysis presente no JSON</td><td><span style="color:#198754;font-weight:600">PASS</span></td></tr>
+<tr><td style="font-family:monospace;font-size:.85rem">TC-AI-008</td><td>✅ [SEM API] Campo warning ou ai_available=false quando sem IA</td><td><span style="color:#198754;font-weight:600">PASS</span></td></tr>
+<tr><td style="font-family:monospace;font-size:.85rem">TC-RU-001</td><td>✅ --file com caminho completo funciona</td><td><span style="color:#198754;font-weight:600">PASS</span></td></tr>
+<tr><td style="font-family:monospace;font-size:.85rem">TC-RU-002</td><td>✅ --file com so o nome (busca automatica por rglob)</td><td><span style="color:#198754;font-weight:600">PASS</span></td></tr>
+<tr><td style="font-family:monospace;font-size:.85rem">TC-RU-003</td><td>✅ Arquivo limpo nao causa exit 1 (sem blockers)</td><td><span style="color:#198754;font-weight:600">PASS</span></td></tr>
+<tr><td style="font-family:monospace;font-size:.85rem">TC-RU-004</td><td>✅ Arquivo com critical causa exit 1</td><td><span style="color:#198754;font-weight:600">PASS</span></td></tr>
+<tr><td style="font-family:monospace;font-size:.85rem">TC-RU-005</td><td>✅ --fail-on critical: apenas warnings nao bloqueia (exit 0)</td><td><span style="color:#198754;font-weight:600">PASS</span></td></tr>
+<tr><td style="font-family:monospace;font-size:.85rem">TC-RU-006</td><td>✅ --fail-on warning: warning causa exit 1</td><td><span style="color:#198754;font-weight:600">PASS</span></td></tr>
+<tr><td style="font-family:monospace;font-size:.85rem">TC-RU-007</td><td>✅ --format json retorna risk_score, risk_label, has_blockers, files_analyzed</td><td><span style="color:#198754;font-weight:600">PASS</span></td></tr>
+<tr><td style="font-family:monospace;font-size:.85rem">TC-RU-008</td><td>✅ risk_score > 0 para arquivo com critical</td><td><span style="color:#198754;font-weight:600">PASS</span></td></tr>
+<tr><td style="font-family:monospace;font-size:.85rem">TC-RU-009</td><td>✅ risk_score 0 para arquivo limpo</td><td><span style="color:#198754;font-weight:600">PASS</span></td></tr>
+<tr><td style="font-family:monospace;font-size:.85rem">TC-RU-010</td><td>✅ --severity error: nenhuma issue de warning no relatorio</td><td><span style="color:#198754;font-weight:600">PASS</span></td></tr>
+<tr><td style="font-family:monospace;font-size:.85rem">TC-RU-011</td><td>✅ --rules-only: sem analise de IA no resultado</td><td><span style="color:#198754;font-weight:600">PASS</span></td></tr>
+<tr><td style="font-family:monospace;font-size:.85rem">TC-RU-012</td><td>✅ Arquivo totalmente inexistente nao explode o runner</td><td><span style="color:#198754;font-weight:600">PASS</span></td></tr>
+<tr><td style="font-family:monospace;font-size:.85rem">TC-RU-013</td><td>✅ Metricas nao zeradas: max_nesting > 0 para deep_nesting.cs</td><td><span style="color:#198754;font-weight:600">PASS</span></td></tr>
+<tr><td style="font-family:monospace;font-size:.85rem">TC-RU-014</td><td>✅ risk_label nao vazio para arquivo com issues</td><td><span style="color:#198754;font-weight:600">PASS</span></td></tr>
+<tr><td style="font-family:monospace;font-size:.85rem">TC-RU-015</td><td>✅ Formato text contem secao Issues Detectadas</td><td><span style="color:#198754;font-weight:600">PASS</span></td></tr>
+<tr><td style="font-family:monospace;font-size:.85rem">TC-RU-016</td><td>✅ Formato text contem secao Metricas</td><td><span style="color:#198754;font-weight:600">PASS</span></td></tr>
+<tr><td style="font-family:monospace;font-size:.85rem">TC-RU-017</td><td>✅ Sem arquivos staged nao explode (exit 0)</td><td><span style="color:#198754;font-weight:600">PASS</span></td></tr>
+<tr><td style="font-family:monospace;font-size:.85rem">TC-RU-018</td><td>✅ has_blockers=true para arquivo com critical/error</td><td><span style="color:#198754;font-weight:600">PASS</span></td></tr>
+</tbody>
+    </table>
+  </div>
+
+  <footer>Code Guardian Tests &nbsp;|&nbsp; 12/09/2026 20:24:07</footer>
+</div>
+</body>
+</html>
